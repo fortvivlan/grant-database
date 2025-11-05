@@ -1,18 +1,15 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import sqlite3
 import os
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
-
-# Get database URL from environment variable
-DATABASE_URL = os.environ.get('DATABASE_URL')
+CORS(app)
 
 def get_db():
-    """Create database connection."""
-    return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+    conn = sqlite3.connect('grant.db')
+    conn.row_factory = sqlite3.Row
+    return conn
 
 def get_language_columns():
     """Get list of language columns dynamically from database."""

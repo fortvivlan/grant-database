@@ -75,7 +75,7 @@ def get_groups():
             GROUP BY g.group_number, g.group_name
             ORDER BY CAST(g.group_number AS INTEGER)
         """)
-        groups = cursor.fetchall()
+        groups = [dict(row) for row in cursor.fetchall()]
         conn.close()
         return jsonify(groups)
     except Exception as e:
@@ -92,7 +92,7 @@ def get_group_questions(group_number):
         cursor.execute("""
             SELECT group_number, group_name
             FROM groups
-            WHERE group_number = %s
+            WHERE group_number = ?
         """, (group_number,))
         group_info = cursor.fetchone()
         
@@ -105,14 +105,14 @@ def get_group_questions(group_number):
             SELECT q.* 
             FROM questions q
             JOIN groups g ON q.group_id = g.id
-            WHERE g.group_number = %s 
+            WHERE g.group_number = ? 
             ORDER BY q.question_number
         """, (group_number,))
-        questions = cursor.fetchall()
+        questions = [dict(row) for row in cursor.fetchall()]
         conn.close()
         
         return jsonify({
-            'group': group_info,
+            'group': dict(group_info),
             'questions': questions
         })
     except Exception as e:
@@ -132,11 +132,11 @@ def get_random_question(group_number):
             SELECT q.* 
             FROM questions q
             JOIN groups g ON q.group_id = g.id
-            WHERE g.group_number = %s 
+            WHERE g.group_number = ? 
             ORDER BY RANDOM() 
-            LIMIT %s
+            LIMIT ?
         """, (group_number, count))
-        questions = cursor.fetchall()
+        questions = [dict(row) for row in cursor.fetchall()]
         conn.close()
         
         if not questions:
@@ -154,7 +154,7 @@ def get_question(question_number):
         cursor = conn.cursor()
         cursor.execute("""
             SELECT * FROM questions 
-            WHERE question_number = %s
+            WHERE question_number = ?
         """, (question_number,))
         question = cursor.fetchone()
         conn.close()
@@ -162,7 +162,7 @@ def get_question(question_number):
         if not question:
             return jsonify({'error': 'Question not found'}), 404
             
-        return jsonify(question)
+        return jsonify(dict(question))
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -185,7 +185,7 @@ def search_questions():
         # Build search query based on language
         if language == 'all':
             # Search across question_text and all language columns
-            where_clauses = ['question_text ILIKE %s'] + [f'{lang} ILIKE %s' for lang in languages]
+            where_clauses = ['question_text LIKE ?'] + [f'{lang} LIKE ?' for lang in languages]
             search_sql = f"""
                 SELECT * FROM questions 
                 WHERE {' OR '.join(where_clauses)}
@@ -202,13 +202,13 @@ def search_questions():
             
             search_sql = f"""
                 SELECT * FROM questions 
-                WHERE {language} ILIKE %s
+                WHERE {language} LIKE ?
                 ORDER BY question_number
                 LIMIT 100
             """
             cursor.execute(search_sql, (f'%{query}%',))
         
-        results = cursor.fetchall()
+        results = [dict(row) for row in cursor.fetchall()]
         conn.close()
         
         return jsonify({
@@ -246,7 +246,7 @@ def get_stats():
             GROUP BY g.group_number, g.group_name
             ORDER BY CAST(g.group_number AS INTEGER)
         """)
-        by_group = cursor.fetchall()
+        by_group = [dict(row) for row in cursor.fetchall()]
         
         # Get available languages
         languages = get_language_columns()

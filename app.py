@@ -23,7 +23,7 @@ def get_language_columns():
             SELECT column_name 
             FROM information_schema.columns 
             WHERE table_name = 'questions' 
-            AND column_name NOT IN ('id', 'question_number', 'group_number', 'question_text')
+            AND column_name NOT IN ('id', 'question_number', 'group_id', 'question_text')
             ORDER BY column_name
         """)
         languages = [row['column_name'] for row in cursor.fetchall()]
@@ -31,7 +31,7 @@ def get_language_columns():
         return languages
     except:
         # Fallback to original languages if query fails
-        return ['russian', 'danish', 'muira', 'nganasan']
+        return ['russian', 'danish', 'muira', 'nganasan', 'polish', 'westcircassian']
 
 @app.route('/')
 def index():
@@ -64,15 +64,19 @@ def get_languages():
 
 @app.route('/api/groups')
 def get_groups():
-    """Get all groups with question counts."""
+    """Get all groups with names and question counts."""
     try:
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT group_number, COUNT(*) as question_count
-            FROM questions
-            GROUP BY group_number
-            ORDER BY group_number
+            SELECT 
+                g.group_number,
+                g.group_name,
+                COUNT(q.id) as question_count
+            FROM groups g
+            LEFT JOIN questions q ON g.id = q.group_id
+            GROUP BY g.group_number, g.group_name
+            ORDER BY CAST(g.group_number AS INTEGER)
         """)
         groups = cursor.fetchall()
         conn.close()
@@ -82,22 +86,38 @@ def get_groups():
 
 @app.route('/api/questions/group/<group_number>')
 def get_group_questions(group_number):
-    """Get all questions in a specific group."""
+    """Get all questions in a specific group with group information."""
     try:
         conn = get_db()
         cursor = conn.cursor()
+        
+        # Get group info
         cursor.execute("""
-            SELECT * FROM questions 
-            WHERE group_number = %s 
-            ORDER BY question_number
+            SELECT group_number, group_name
+            FROM groups
+            WHERE group_number = %s
+        """, (group_number,))
+        group_info = cursor.fetchone()
+        
+        if not group_info:
+            conn.close()
+            return jsonify({'error': 'Group not found'}), 404
+        
+        # Get questions in this group
+        cursor.execute("""
+            SELECT q.* 
+            FROM questions q
+            JOIN groups g ON q.group_id = g.id
+            WHERE g.group_number = %s 
+            ORDER BY q.question_number
         """, (group_number,))
         questions = cursor.fetchall()
         conn.close()
         
-        if not questions:
-            return jsonify({'error': 'Group not found'}), 404
-            
-        return jsonify(questions)
+        return jsonify({
+            'group': group_info,
+            'questions': questions
+        })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -112,8 +132,10 @@ def get_random_question(group_number):
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT * FROM questions 
-            WHERE group_number = %s 
+            SELECT q.* 
+            FROM questions q
+            JOIN groups g ON q.group_id = g.id
+            WHERE g.group_number = %s 
             ORDER BY RANDOM() 
             LIMIT %s
         """, (group_number, count))
@@ -212,12 +234,20 @@ def get_stats():
         cursor.execute("SELECT COUNT(*) as total FROM questions")
         total = cursor.fetchone()['total']
         
-        # Questions by group
+        # Total groups
+        cursor.execute("SELECT COUNT(*) as total FROM groups")
+        total_groups = cursor.fetchone()['total']
+        
+        # Questions by group with names
         cursor.execute("""
-            SELECT group_number, COUNT(*) as count
-            FROM questions
-            GROUP BY group_number
-            ORDER BY group_number
+            SELECT 
+                g.group_number,
+                g.group_name,
+                COUNT(q.id) as count
+            FROM groups g
+            LEFT JOIN questions q ON g.id = q.group_id
+            GROUP BY g.group_number, g.group_name
+            ORDER BY CAST(g.group_number AS INTEGER)
         """)
         by_group = cursor.fetchall()
         
@@ -239,6 +269,7 @@ def get_stats():
         
         return jsonify({
             'total_questions': total,
+            'total_groups': total_groups,
             'complete_responses': complete,
             'available_languages': languages,
             'by_group': by_group

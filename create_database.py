@@ -2,6 +2,64 @@ import sqlite3
 import re
 import openpyxl
 from typing import Dict, List, Tuple
+from bs4 import BeautifulSoup
+
+def parse_excel_questions_and_groups(excel_path: str) -> Tuple[Dict[str, str], Dict[str, Dict]]:
+    """Parse quest.xlsx and extract questions and group information.
+    
+    Returns:
+        Tuple of (questions_dict, groups_dict)
+        - questions_dict: Maps question numbers to their full question text
+        - groups_dict: Maps group numbers to {'name': str, 'question_numbers': list}
+    """
+    wb = openpyxl.load_workbook(excel_path)
+    ws = wb.active
+    
+    questions = {}
+    groups = {}
+    current_group_num = None
+    
+    for row in range(1, ws.max_row + 1):
+        # Check column 1 (group headers)
+        group_cell = ws.cell(row, 1).value
+        if group_cell and isinstance(group_cell, str):
+            # Extract group number and name (e.g., "1. Границы клауз...")
+            match = re.match(r'^(\d+)\.\s*(.+)$', group_cell.strip())
+            if match:
+                group_num = match.group(1)
+                group_name = match.group(2).strip()
+                current_group_num = group_num
+                groups[group_num] = {
+                    'name': group_name,
+                    'question_numbers': []
+                }
+        
+        # Check column 2 (main questions)
+        question_cell = ws.cell(row, 2).value
+        if question_cell and isinstance(question_cell, str):
+            question_text = question_cell.strip()
+            match = re.match(r'^(\d+\.\d+(?:\.\d+)*)[.\s]', question_text)
+            if match:
+                question_num = match.group(1)
+                questions[question_num] = question_text
+                # Associate question with current group
+                if current_group_num and current_group_num in groups:
+                    groups[current_group_num]['question_numbers'].append(question_num)
+        
+        # Check column 3 (subquestions)
+        subquestion_cell = ws.cell(row, 3).value
+        if subquestion_cell and isinstance(subquestion_cell, str):
+            subquestion_text = subquestion_cell.strip()
+            match = re.match(r'^(\d+\.\d+(?:\.\d+)*)[.\s]', subquestion_text)
+            if match:
+                subquestion_num = match.group(1)
+                questions[subquestion_num] = subquestion_text
+                # Associate subquestion with current group
+                if current_group_num and current_group_num in groups:
+                    groups[current_group_num]['question_numbers'].append(subquestion_num)
+    
+    wb.close()
+    return questions, groups
 
 def parse_excel_questions(excel_path: str) -> Dict[str, str]:
     """Parse quest.xlsx and extract all questions with their numbers and full text.
@@ -44,14 +102,14 @@ def normalize_question_text(text: str) -> str:
     return text.strip()
 
 def parse_language_file(filename: str, questions: Dict[str, str]) -> Dict[str, str]:
-    """Parse a language file by finding question texts and extracting answers between them.
+    """Parse a language file with <answer></answer> tags and convert to HTML.
     
     Args:
-        filename: Path to the language text file
+        filename: Path to the language text file  
         questions: Dictionary of question numbers to question texts from Excel
     
     Returns:
-        Dictionary mapping question numbers to answer texts
+        Dictionary mapping question numbers to HTML-formatted answer texts
     """
     # Try different encodings
     encodings = ['utf-8', 'utf-16', 'cp1251', 'latin-1']
@@ -70,68 +128,79 @@ def parse_language_file(filename: str, questions: Dict[str, str]) -> Dict[str, s
     
     answers = {}
     
-    # Create a sorted list of questions by their position in the file
-    question_positions = []
+    # Find all <answer>...</answer> blocks
+    # Pattern: question_number followed by <answer>content</answer>
+    pattern = r'(\d+(?:\.\d+)*)[.\s\t]*<answer>(.*?)</answer>'
     
-    for question_num, question_text in questions.items():
-        # Extract the question number
-        match = re.match(r'^(\d+\.\d+(?:\.\d+)*)[.\s\t]', question_text)
-        if match:
-            number_part = match.group(1)
-            
-            # Find the question number in the content
-            # Pattern: number followed by period, space, or tab
-            pattern = r'\b' + re.escape(number_part) + r'[.\s\t]'
-            
-            for m in re.finditer(pattern, content):
-                # Get the line containing this question number
-                line_start = content.rfind('\n', 0, m.start()) + 1
-                line_end = content.find('\n', m.end())
-                if line_end == -1:
-                    line_end = len(content)
-                
-                line_content = content[line_start:line_end]
-                
-                # Check if this line contains the question (not just the number)
-                # by checking if it's long enough and starts with the number
-                if line_content.strip().startswith(number_part):
-                    # This looks like a question line
-                    question_positions.append({
-                        'number': question_num,
-                        'start': line_start,
-                        'end': line_end + 1,  # Include the newline
-                        'full_text': question_text
-                    })
-                    break  # Only take first match
-    
-    # Sort by position in file
-    question_positions.sort(key=lambda x: x['start'])
-    
-    # Extract text between questions
-    for i, question_info in enumerate(question_positions):
-        question_num = question_info['number']
-        start_pos = question_info['end']
+    for match in re.finditer(pattern, content, re.DOTALL | re.IGNORECASE):
+        question_num = match.group(1)
+        answer_text = match.group(2).strip()
         
-        # Find end position (start of next question, or end of file)
-        if i + 1 < len(question_positions):
-            end_pos = question_positions[i + 1]['start']
-        else:
-            end_pos = len(content)
-        
-        # Extract answer text
-        answer_text = content[start_pos:end_pos].strip()
-        
-        # Clean up the answer text
-        # Remove leading bullets, newlines, etc.
-        answer_text = re.sub(r'^[\s•\n\r]+', '', answer_text)
-        answer_text = re.sub(r'[\n\r]+', ' ', answer_text)  # Replace newlines with spaces
-        answer_text = re.sub(r'\s+', ' ', answer_text)  # Normalize spaces
-        answer_text = answer_text.strip()
-        
-        if answer_text:
-            answers[question_num] = answer_text
+        # Only process if this question number is in our questions dict
+        if question_num in questions:
+            # Convert answer to HTML
+            html_answer = convert_answer_to_html(answer_text)
+            answers[question_num] = html_answer
     
     return answers
+
+def convert_answer_to_html(text: str) -> str:
+    """Convert plain text answer to HTML with proper formatting.
+    
+    Handles:
+    - Bullet points (•) -> <ul><li>
+    - Multiple paragraphs -> <p>
+    - Preserves special characters and formatting
+    """
+    if not text:
+        return ''
+    
+    lines = text.split('\n')
+    html_parts = []
+    in_list = False
+    current_paragraph = []
+    
+    for line in lines:
+        line = line.strip()
+        if not line:
+            # Empty line - end current paragraph or list
+            if current_paragraph:
+                if in_list:
+                    html_parts.append('</ul>')
+                    in_list = False
+                else:
+                    html_parts.append(f'<p>{" ".join(current_paragraph)}</p>')
+                current_paragraph = []
+            continue
+        
+        # Check if line starts with bullet
+        if line.startswith('•'):
+            # Start list if not already in one
+            if not in_list:
+                if current_paragraph:
+                    html_parts.append(f'<p>{" ".join(current_paragraph)}</p>')
+                    current_paragraph = []
+                html_parts.append('<ul>')
+                in_list = True
+            
+            # Add list item
+            item_text = line[1:].strip()
+            html_parts.append(f'<li>{item_text}</li>')
+        else:
+            # Regular text
+            if in_list:
+                # End the list
+                html_parts.append('</ul>')
+                in_list = False
+            current_paragraph.append(line)
+    
+    # Handle remaining content
+    if in_list:
+        html_parts.append('</ul>')
+    elif current_paragraph:
+        html_parts.append(f'<p>{" ".join(current_paragraph)}</p>')
+    
+    return ''.join(html_parts)
 
 def merge_subquestions(language_data: Dict[str, str], quest_data: Dict[str, str]) -> Dict[str, str]:
     """Merge sub-questions that don't exist in quest.txt into their parent questions.
@@ -173,9 +242,10 @@ def get_group_number(question_number: str) -> str:
 def create_database(db_path: str):
     """Create SQLite database with questionnaire data."""
     
-    print("Parsing Excel file for questions...")
-    quest_data = parse_excel_questions('quest.xlsx')
+    print("Parsing Excel file for questions and groups...")
+    quest_data, groups_data = parse_excel_questions_and_groups('quest.xlsx')
     print(f"Found {len(quest_data)} questions in quest.xlsx")
+    print(f"Found {len(groups_data)} groups in quest.xlsx")
     
     print("\nParsing language files...")
     russian_data = parse_language_file('russian.txt', quest_data)
@@ -193,38 +263,66 @@ def create_database(db_path: str):
     polish_data = parse_language_file('polish.txt', quest_data)
     print(f"Found {len(polish_data)} answers in polish.txt")
     
-    circassian_data = parse_language_file('circassian.txt', quest_data)
-    print(f"Found {len(circassian_data)} answers in circassian.txt")
+    westcircassian_data = parse_language_file('westcircassian.txt', quest_data)
+    print(f"Found {len(westcircassian_data)} answers in westcircassian.txt")
     
     # Create database
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
-    # Create table
+    # Create groups table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS groups (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            group_number TEXT UNIQUE NOT NULL,
+            group_name TEXT NOT NULL
+        )
+    ''')
+    
+    # Create questions table with TEXT columns for HTML content
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS questions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             question_number TEXT UNIQUE NOT NULL,
-            group_number TEXT NOT NULL,
+            group_id INTEGER NOT NULL,
             question_text TEXT NOT NULL,
             russian TEXT,
             danish TEXT,
             muira TEXT,
             nganasan TEXT,
             polish TEXT,
-            circassian TEXT
+            westcircassian TEXT,
+            FOREIGN KEY (group_id) REFERENCES groups(id)
         )
     ''')
     
-    # Create index for faster group queries
+    # Create indexes for faster queries
     cursor.execute('''
-        CREATE INDEX IF NOT EXISTS idx_group_number ON questions(group_number)
+        CREATE INDEX IF NOT EXISTS idx_group_id ON questions(group_id)
     ''')
     
-    # Insert data
-    print("\nInserting data into database...")
+    # Insert groups
+    print("\nInserting groups into database...")
+    group_id_map = {}  # Map group_number to database id
+    for group_num in sorted(groups_data.keys(), key=lambda x: int(x)):
+        group_info = groups_data[group_num]
+        cursor.execute('''
+            INSERT INTO groups (group_number, group_name)
+            VALUES (?, ?)
+        ''', (group_num, group_info['name']))
+        group_id_map[group_num] = cursor.lastrowid
+        print(f"  Group {group_num}: {group_info['name']}")
+    
+    # Insert questions
+    print("\nInserting questions into database...")
     for question_num, question_text in quest_data.items():
         group_num = get_group_number(question_num)
+        
+        # Get group_id from the map
+        group_id = group_id_map.get(group_num)
+        if not group_id:
+            print(f"  Warning: No group found for question {question_num}")
+            continue
         
         # Get language data (use empty string if not found)
         russian_text = russian_data.get(question_num, '')
@@ -232,14 +330,14 @@ def create_database(db_path: str):
         muira_text = muira_data.get(question_num, '')
         nganasan_text = nganasan_data.get(question_num, '')
         polish_text = polish_data.get(question_num, '')
-        circassian_text = circassian_data.get(question_num, '')
+        westcircassian_text = westcircassian_data.get(question_num, '')
         
         try:
             cursor.execute('''
                 INSERT INTO questions 
-                (question_number, group_number, question_text, russian, danish, muira, nganasan, polish, circassian)
+                (question_number, group_id, question_text, russian, danish, muira, nganasan, polish, westcircassian)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (question_num, group_num, question_text, russian_text, danish_text, muira_text, nganasan_text, polish_text, circassian_text))
+            ''', (question_num, group_id, question_text, russian_text, danish_text, muira_text, nganasan_text, polish_text, westcircassian_text))
         except sqlite3.IntegrityError as e:
             print(f"ERROR: Duplicate question number: {question_num}")
             print(f"  Text: {question_text[:100]}")
@@ -251,7 +349,7 @@ def create_database(db_path: str):
     cursor.execute('SELECT COUNT(*) FROM questions')
     total_count = cursor.fetchone()[0]
     
-    cursor.execute('SELECT COUNT(DISTINCT group_number) FROM questions')
+    cursor.execute('SELECT COUNT(*) FROM groups')
     group_count = cursor.fetchone()[0]
     
     print(f"\nDatabase created successfully!")
@@ -266,14 +364,19 @@ def create_database(db_path: str):
         print(f"  {row[0]}: {row[1][:80]}...")
     
     print("\n2. Questions in group 1:")
-    cursor.execute('SELECT COUNT(*) FROM questions WHERE group_number = "1"')
+    cursor.execute('''
+        SELECT COUNT(*) FROM questions q
+        JOIN groups g ON q.group_id = g.id
+        WHERE g.group_number = "1"
+    ''')
     print(f"  Count: {cursor.fetchone()[0]}")
     
-    print("\n3. Random question from group 2:")
-    cursor.execute('SELECT question_number, question_text FROM questions WHERE group_number = "2" ORDER BY RANDOM() LIMIT 1')
+    print("\n3. Sample question with HTML answer:")
+    cursor.execute('SELECT question_number, question_text, russian FROM questions WHERE russian != "" LIMIT 1')
     row = cursor.fetchone()
     if row:
         print(f"  {row[0]}: {row[1][:80]}...")
+        print(f"  Russian answer (HTML): {row[2][:100]}...")
     
     conn.close()
 

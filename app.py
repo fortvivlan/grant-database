@@ -7,7 +7,7 @@ app = Flask(__name__)
 CORS(app)
 
 def get_db():
-    conn = sqlite3.connect('grant.db')
+    conn = sqlite3.connect('grant_database.db')
     conn.row_factory = sqlite3.Row
     return conn
 

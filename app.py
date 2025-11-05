@@ -16,16 +16,12 @@ def get_language_columns():
     try:
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute("""
-            SELECT column_name 
-            FROM information_schema.columns 
-            WHERE table_name = 'questions' 
-            AND column_name NOT IN ('id', 'question_number', 'group_id', 'question_text')
-            ORDER BY column_name
-        """)
-        languages = [row['column_name'] for row in cursor.fetchall()]
+        # SQLite syntax for getting column names
+        cursor.execute("PRAGMA table_info(questions)")
+        columns = cursor.fetchall()
+        languages = [col[1] for col in columns if col[1] not in ('id', 'question_number', 'group_id', 'question_text')]
         conn.close()
-        return languages
+        return sorted(languages)
     except:
         # Fallback to original languages if query fails
         return ['russian', 'danish', 'muira', 'nganasan', 'polish', 'westcircassian']

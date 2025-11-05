@@ -96,9 +96,9 @@ def get_group_questions(group_number):
             conn.close()
             return jsonify({'error': 'Group not found'}), 404
         
-        # Get questions in this group
+        # Get questions in this group with group info
         cursor.execute("""
-            SELECT q.* 
+            SELECT q.*, g.group_number, g.group_name
             FROM questions q
             JOIN groups g ON q.group_id = g.id
             WHERE g.group_number = ? 
@@ -125,7 +125,7 @@ def get_random_question(group_number):
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT q.* 
+            SELECT q.*, g.group_number, g.group_name
             FROM questions q
             JOIN groups g ON q.group_id = g.id
             WHERE g.group_number = ? 
@@ -149,8 +149,10 @@ def get_question(question_number):
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT * FROM questions 
-            WHERE question_number = ?
+            SELECT q.*, g.group_number, g.group_name
+            FROM questions q
+            JOIN groups g ON q.group_id = g.id
+            WHERE q.question_number = ?
         """, (question_number,))
         question = cursor.fetchone()
         conn.close()
@@ -181,11 +183,13 @@ def search_questions():
         # Build search query based on language
         if language == 'all':
             # Search across question_text and all language columns
-            where_clauses = ['question_text LIKE ?'] + [f'{lang} LIKE ?' for lang in languages]
+            where_clauses = ['q.question_text LIKE ?'] + [f'q.{lang} LIKE ?' for lang in languages]
             search_sql = f"""
-                SELECT * FROM questions 
+                SELECT q.*, g.group_number, g.group_name
+                FROM questions q
+                JOIN groups g ON q.group_id = g.id
                 WHERE {' OR '.join(where_clauses)}
-                ORDER BY question_number
+                ORDER BY q.question_number
                 LIMIT 100
             """
             search_pattern = f'%{query}%'
@@ -197,9 +201,11 @@ def search_questions():
                 return jsonify({'error': f'Invalid language. Use: {", ".join(valid_languages)}'}), 400
             
             search_sql = f"""
-                SELECT * FROM questions 
-                WHERE {language} LIKE ?
-                ORDER BY question_number
+                SELECT q.*, g.group_number, g.group_name
+                FROM questions q
+                JOIN groups g ON q.group_id = g.id
+                WHERE q.{language} LIKE ?
+                ORDER BY q.question_number
                 LIMIT 100
             """
             cursor.execute(search_sql, (f'%{query}%',))

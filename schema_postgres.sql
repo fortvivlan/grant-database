@@ -20,7 +20,8 @@ CREATE TABLE questions (
     muira TEXT,
     nganasan TEXT,
     polish TEXT,
-    westcircassian TEXT
+    westcircassian TEXT,
+    bulgarian TEXT
 );
 
 CREATE INDEX idx_group_id ON questions(group_id);

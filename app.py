@@ -24,7 +24,7 @@ def get_language_columns():
         return sorted(languages)
     except:
         # Fallback to original languages if query fails
-        return ['russian', 'danish', 'muira', 'nganasan', 'polish', 'westcircassian']
+        return ['bulgarian', 'danish', 'muira', 'nganasan', 'polish', 'russian', 'westcircassian']
 
 @app.route('/')
 def index():
@@ -102,7 +102,8 @@ def get_group_questions(group_number):
             FROM questions q
             JOIN groups g ON q.group_id = g.id
             WHERE g.group_number = ? 
-            ORDER BY q.question_number
+            ORDER BY CAST(SUBSTR(q.question_number, 1, INSTR(q.question_number, '.') - 1) AS INTEGER),
+                     CAST(SUBSTR(q.question_number, INSTR(q.question_number, '.') + 1) AS INTEGER)
         """, (group_number,))
         questions = [dict(row) for row in cursor.fetchall()]
         conn.close()
@@ -189,7 +190,8 @@ def search_questions():
                 FROM questions q
                 JOIN groups g ON q.group_id = g.id
                 WHERE {' OR '.join(where_clauses)}
-                ORDER BY q.question_number
+                ORDER BY CAST(SUBSTR(q.question_number, 1, INSTR(q.question_number, '.') - 1) AS INTEGER),
+                         CAST(SUBSTR(q.question_number, INSTR(q.question_number, '.') + 1) AS INTEGER)
                 LIMIT 100
             """
             search_pattern = f'%{query}%'
@@ -205,7 +207,8 @@ def search_questions():
                 FROM questions q
                 JOIN groups g ON q.group_id = g.id
                 WHERE q.{language} LIKE ?
-                ORDER BY q.question_number
+                ORDER BY CAST(SUBSTR(q.question_number, 1, INSTR(q.question_number, '.') - 1) AS INTEGER),
+                         CAST(SUBSTR(q.question_number, INSTR(q.question_number, '.') + 1) AS INTEGER)
                 LIMIT 100
             """
             cursor.execute(search_sql, (f'%{query}%',))

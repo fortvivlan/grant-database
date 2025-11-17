@@ -266,6 +266,9 @@ def create_database(db_path: str):
     westcircassian_data = parse_language_file('westcircassian.txt', quest_data)
     print(f"Found {len(westcircassian_data)} answers in westcircassian.txt")
     
+    bulgarian_data = parse_language_file('bulgarian.txt', quest_data)
+    print(f"Found {len(bulgarian_data)} answers in bulgarian.txt")
+    
     # Create database
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -292,6 +295,7 @@ def create_database(db_path: str):
             nganasan TEXT,
             polish TEXT,
             westcircassian TEXT,
+            bulgarian TEXT,
             FOREIGN KEY (group_id) REFERENCES groups(id)
         )
     ''')
@@ -331,13 +335,14 @@ def create_database(db_path: str):
         nganasan_text = nganasan_data.get(question_num, '')
         polish_text = polish_data.get(question_num, '')
         westcircassian_text = westcircassian_data.get(question_num, '')
+        bulgarian_text = bulgarian_data.get(question_num, '')
         
         try:
             cursor.execute('''
                 INSERT INTO questions 
-                (question_number, group_id, question_text, russian, danish, muira, nganasan, polish, westcircassian)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (question_num, group_id, question_text, russian_text, danish_text, muira_text, nganasan_text, polish_text, westcircassian_text))
+                (question_number, group_id, question_text, russian, danish, muira, nganasan, polish, westcircassian, bulgarian)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (question_num, group_id, question_text, russian_text, danish_text, muira_text, nganasan_text, polish_text, westcircassian_text, bulgarian_text))
         except sqlite3.IntegrityError as e:
             print(f"ERROR: Duplicate question number: {question_num}")
             print(f"  Text: {question_text[:100]}")

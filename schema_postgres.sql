@@ -16,12 +16,16 @@ CREATE TABLE questions (
     group_id INTEGER NOT NULL REFERENCES groups(id),
     question_text TEXT NOT NULL,
     russian TEXT,
-    danish TEXT,
     muira TEXT,
+    danish TEXT,
     nganasan TEXT,
-    polish TEXT,
     westcircassian TEXT,
-    bulgarian TEXT
+    polish TEXT,
+    bulgarian TEXT,
+    nanai TEXT,
+    nornakhichevan TEXT,
+    udmurt TEXT,
+    greben TEXT
 );
 
 CREATE INDEX idx_group_id ON questions(group_id);

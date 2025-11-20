@@ -102,14 +102,14 @@ def normalize_question_text(text: str) -> str:
     return text.strip()
 
 def parse_language_file(filename: str, questions: Dict[str, str]) -> Dict[str, str]:
-    """Parse a language file with <answer></answer> tags and convert to HTML.
+    """Parse a language HTML file with <answer></answer> tags containing HTML content.
     
     Args:
-        filename: Path to the language text file  
+        filename: Path to the language HTML file in languages/ folder
         questions: Dictionary of question numbers to question texts from Excel
     
     Returns:
-        Dictionary mapping question numbers to HTML-formatted answer texts
+        Dictionary mapping question numbers to HTML answer texts (unchanged from file)
     """
     # Try different encodings
     encodings = ['utf-8', 'utf-16', 'cp1251', 'latin-1']
@@ -134,13 +134,12 @@ def parse_language_file(filename: str, questions: Dict[str, str]) -> Dict[str, s
     
     for match in re.finditer(pattern, content, re.DOTALL | re.IGNORECASE):
         question_num = match.group(1)
-        answer_text = match.group(2).strip()
+        answer_html = match.group(2).strip()
         
         # Only process if this question number is in our questions dict
         if question_num in questions:
-            # Convert answer to HTML
-            html_answer = convert_answer_to_html(answer_text)
-            answers[question_num] = html_answer
+            # Store the HTML content as-is (no conversion needed)
+            answers[question_num] = answer_html
     
     return answers
 
@@ -248,26 +247,38 @@ def create_database(db_path: str):
     print(f"Found {len(groups_data)} groups in quest.xlsx")
     
     print("\nParsing language files...")
-    russian_data = parse_language_file('russian.txt', quest_data)
-    print(f"Found {len(russian_data)} answers in russian.txt")
+    russian_data = parse_language_file('languages/01-russian.html', quest_data)
+    print(f"Found {len(russian_data)} answers in 01-russian.html")
     
-    danish_data = parse_language_file('danish.txt', quest_data)
-    print(f"Found {len(danish_data)} answers in danish.txt")
+    muira_data = parse_language_file('languages/02-muira.html', quest_data)
+    print(f"Found {len(muira_data)} answers in 02-muira.html")
     
-    muira_data = parse_language_file('muira.txt', quest_data)
-    print(f"Found {len(muira_data)} answers in muira.txt")
+    danish_data = parse_language_file('languages/03-danish.html', quest_data)
+    print(f"Found {len(danish_data)} answers in 03-danish.html")
     
-    nganasan_data = parse_language_file('nganasan.txt', quest_data)
-    print(f"Found {len(nganasan_data)} answers in nganasan.txt")
+    nganasan_data = parse_language_file('languages/04-nganasan.html', quest_data)
+    print(f"Found {len(nganasan_data)} answers in 04-nganasan.html")
     
-    polish_data = parse_language_file('polish.txt', quest_data)
-    print(f"Found {len(polish_data)} answers in polish.txt")
+    westcircassian_data = parse_language_file('languages/05-westcircassian.html', quest_data)
+    print(f"Found {len(westcircassian_data)} answers in 05-westcircassian.html")
     
-    westcircassian_data = parse_language_file('westcircassian.txt', quest_data)
-    print(f"Found {len(westcircassian_data)} answers in westcircassian.txt")
+    polish_data = parse_language_file('languages/06-polish.html', quest_data)
+    print(f"Found {len(polish_data)} answers in 06-polish.html")
     
-    bulgarian_data = parse_language_file('bulgarian.txt', quest_data)
-    print(f"Found {len(bulgarian_data)} answers in bulgarian.txt")
+    bulgarian_data = parse_language_file('languages/07-bulgarian.html', quest_data)
+    print(f"Found {len(bulgarian_data)} answers in 07-bulgarian.html")
+    
+    nanai_data = parse_language_file('languages/08-nanai.html', quest_data)
+    print(f"Found {len(nanai_data)} answers in 08-nanai.html")
+    
+    nornakhichevan_data = parse_language_file('languages/09-nor-nakhichevan.html', quest_data)
+    print(f"Found {len(nornakhichevan_data)} answers in 09-nor-nakhichevan.html")
+    
+    udmurt_data = parse_language_file('languages/10-udmurt.html', quest_data)
+    print(f"Found {len(udmurt_data)} answers in 10-udmurt.html")
+    
+    greben_data = parse_language_file('languages/11-Greben.html', quest_data)
+    print(f"Found {len(greben_data)} answers in 11-Greben.html")
     
     # Create database
     conn = sqlite3.connect(db_path)
@@ -290,12 +301,16 @@ def create_database(db_path: str):
             group_id INTEGER NOT NULL,
             question_text TEXT NOT NULL,
             russian TEXT,
-            danish TEXT,
             muira TEXT,
+            danish TEXT,
             nganasan TEXT,
-            polish TEXT,
             westcircassian TEXT,
+            polish TEXT,
             bulgarian TEXT,
+            nanai TEXT,
+            nornakhichevan TEXT,
+            udmurt TEXT,
+            greben TEXT,
             FOREIGN KEY (group_id) REFERENCES groups(id)
         )
     ''')
@@ -330,19 +345,23 @@ def create_database(db_path: str):
         
         # Get language data (use empty string if not found)
         russian_text = russian_data.get(question_num, '')
-        danish_text = danish_data.get(question_num, '')
         muira_text = muira_data.get(question_num, '')
+        danish_text = danish_data.get(question_num, '')
         nganasan_text = nganasan_data.get(question_num, '')
-        polish_text = polish_data.get(question_num, '')
         westcircassian_text = westcircassian_data.get(question_num, '')
+        polish_text = polish_data.get(question_num, '')
         bulgarian_text = bulgarian_data.get(question_num, '')
+        nanai_text = nanai_data.get(question_num, '')
+        nornakhichevan_text = nornakhichevan_data.get(question_num, '')
+        udmurt_text = udmurt_data.get(question_num, '')
+        greben_text = greben_data.get(question_num, '')
         
         try:
             cursor.execute('''
                 INSERT INTO questions 
-                (question_number, group_id, question_text, russian, danish, muira, nganasan, polish, westcircassian, bulgarian)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (question_num, group_id, question_text, russian_text, danish_text, muira_text, nganasan_text, polish_text, westcircassian_text, bulgarian_text))
+                (question_number, group_id, question_text, russian, muira, danish, nganasan, westcircassian, polish, bulgarian, nanai, nornakhichevan, udmurt, greben)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (question_num, group_id, question_text, russian_text, muira_text, danish_text, nganasan_text, westcircassian_text, polish_text, bulgarian_text, nanai_text, nornakhichevan_text, udmurt_text, greben_text))
         except sqlite3.IntegrityError as e:
             print(f"ERROR: Duplicate question number: {question_num}")
             print(f"  Text: {question_text[:100]}")

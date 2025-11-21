@@ -280,6 +280,9 @@ def create_database(db_path: str):
     greben_data = parse_language_file('languages/11-Greben.html', quest_data)
     print(f"Found {len(greben_data)} answers in 11-Greben.html")
     
+    mountmari_data = parse_language_file('languages/12-mountmari.html', quest_data)
+    print(f"Found {len(mountmari_data)} answers in 12-mountmari.html")
+    
     # Create database
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -311,6 +314,7 @@ def create_database(db_path: str):
             nornakhichevan TEXT,
             udmurt TEXT,
             greben TEXT,
+            mountmari TEXT,
             FOREIGN KEY (group_id) REFERENCES groups(id)
         )
     ''')
@@ -355,13 +359,14 @@ def create_database(db_path: str):
         nornakhichevan_text = nornakhichevan_data.get(question_num, '')
         udmurt_text = udmurt_data.get(question_num, '')
         greben_text = greben_data.get(question_num, '')
+        mountmari_text = mountmari_data.get(question_num, '')
         
         try:
             cursor.execute('''
                 INSERT INTO questions 
-                (question_number, group_id, question_text, russian, muira, danish, nganasan, westcircassian, polish, bulgarian, nanai, nornakhichevan, udmurt, greben)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (question_num, group_id, question_text, russian_text, muira_text, danish_text, nganasan_text, westcircassian_text, polish_text, bulgarian_text, nanai_text, nornakhichevan_text, udmurt_text, greben_text))
+                (question_number, group_id, question_text, russian, muira, danish, nganasan, westcircassian, polish, bulgarian, nanai, nornakhichevan, udmurt, greben, mountmari)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (question_num, group_id, question_text, russian_text, muira_text, danish_text, nganasan_text, westcircassian_text, polish_text, bulgarian_text, nanai_text, nornakhichevan_text, udmurt_text, greben_text, mountmari_text))
         except sqlite3.IntegrityError as e:
             print(f"ERROR: Duplicate question number: {question_num}")
             print(f"  Text: {question_text[:100]}")

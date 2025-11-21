@@ -25,7 +25,8 @@ CREATE TABLE questions (
     nanai TEXT,
     nornakhichevan TEXT,
     udmurt TEXT,
-    greben TEXT
+    greben TEXT,
+    mountmari TEXT
 );
 
 CREATE INDEX idx_group_id ON questions(group_id);

@@ -1,0 +1,1365 @@
+\documentclass[12pt]{article}
+\usepackage[letterpaper,margin=0.7in]{geometry}
+%\linespread{1.25}
+%\usepackage{indentfirst}
+
+\usepackage[bottom]{footmisc} % makesfootnotes stick to the bottom of the page
+% \usepackage[compact]{titlesec}
+% 	\titleformat{\section}[runin]{\normalfont\bfseries}{\thesection.}{.5em}{}[.]
+% 	\titleformat{\subsection}[runin]{\normalfont\scshape}{\thesubsection.}{.5em}{}[.]
+% 	\titleformat{\subsubsection}[runin]{\normalfont\scshape}{\thesubsubsection.}{.5em}{}[.]
+
+\usepackage[T1]{fontenc}
+\usepackage[english, russian]{babel} % russian
+
+\usepackage{xltxtra}
+\usepackage[no-math]{fontspec}
+
+\setmainfont[
+SmallCapsFont={Libertinus Serif},
+SmallCapsFeatures={Letters=SmallCaps},
+]{Tinos} % Crimson, Libertinus Serif, EB Garamond, Caladea, Tinos, TeX Gyre Termes, Charis SIL, GFS Didot, IndUni-T, Aboriginal Serif, Gentium Plus, Latin Modern Roman, Cochineal, XCharter
+
+\usepackage{pifont} % font for symbols like OT's pointing finger \ding{43}, check mark \ding{51}, and x-mark \ding{51}
+\usepackage{tipa} % font for IPA symbols
+\usepackage{stmaryrd} % font for double brackets: \llbracket, \rrbracket
+\usepackage[normalem]{ulem} % to cross out \sout{}, underline \uline{}
+\usepackage{fancybox} % to create boxes around text: \fbox{} \ovalbox{}
+\usepackage{fancyhdr} % for headers and footers
+\usepackage{paralist} % to create numbered lists where items are not separated by line breaks
+\usepackage{wrapfig} % to wrap text around figures and diagrams
+\usepackage{csquotes} % for quotes
+\usepackage{spverbatim} % for breaks
+\usepackage{tabto} % for tabulation
+\usepackage{hyphenat}
+\usepackage{enumitem}
+
+% Math symbols
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathabx}
+\usepackage{siunitx}
+
+% Tables
+\usepackage{booktabs} % \toprule, \midrule and \bottomrule in tables
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{array}
+\usepackage{adjustbox}
+\usepackage{makecell}
+\usepackage{float}
+
+% Tree diagrams and glossing
+\usepackage{etoolbox}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usepackage[linguistics]{forest}
+\usepackage{expex}
+\usepackage{movement-arrows}
+\usetikzlibrary{arrows}
+\usetikzlibrary{matrix}
+\usetikzlibrary{positioning}
+\usetikzlibrary{tikzmark}
+\usetikzlibrary{decorations.shapes}
+\usetikzlibrary{decorations.pathmorphing}
+
+\tikzset{snake it/.style={decorate, decoration=snake}}
+
+\tikzset{mytree/.style={baseline=(top.base),
+		level distance=2.5em, sibling distance=4em, align=center,
+		parent anchor=south, child anchor=south, anchor=north}}
+
+\forestset{
+	fairly nice empty nodes/.style={
+		delay={where content={}{shape=coordinate,for parent={
+					for children={anchor=north}}}{}},
+		for tree={calign=fixed edge angles, calign angle=65}
+	},
+	default preamble=fairly nice empty nodes}
+
+\lingset{numoffset=2.5ex, textoffset=2ex, belowglpreambleskip=-0.5ex, aboveglftskip=0ex, belowexskip=0.5ex, aboveexskip=0.5ex, interpartskip=0ex, everygla=}
+
+% References
+\usepackage[dvipsnames]{xcolor}
+\usepackage{hyperref}
+\hypersetup{%
+	colorlinks,
+	linkcolor=Black,%
+	citecolor=BrickRed,% BrickRed
+	filecolor=Mulberry,%
+	urlcolor=teal,%
+	menucolor=Blue,%
+	runcolor=Mulberry,%
+	linkbordercolor=Green,%
+	citebordercolor=Green,%
+	filebordercolor=Mulberry,%
+	urlbordercolor=NavyBlue,%
+	menubordercolor=BrickRed,%
+	runbordercolor=Mulberry%
+}
+
+% Bibliography
+\usepackage[
+bibstyle=unified,
+sorting=nyt,
+url=false,
+doi=true,
+backend=biber,
+natbib=true,
+citestyle=authoryear,
+compactlinks=false,
+ibidtracker=false,
+babel=other
+]{biblatex} % bibstyle=unified, citestyle=unified, backend=biber
+\renewcommand*{\bibfont}{\footnotesize}
+\addbibresource{bibliography.bib}
+\urlstyle{tt}
+
+% Hyperreffing author's name
+\DeclareCiteCommand{\cite}
+{\usebibmacro{prenote}}
+{\usebibmacro{citeindex}%
+	\printtext[bibhyperref]{\usebibmacro{cite}}}
+{\multicitedelim}
+{\usebibmacro{postnote}}
+
+\DeclareCiteCommand{\parencite}[\mkbibparens]
+{\usebibmacro{prenote}}
+{\usebibmacro{citeindex}%
+	\printtext[bibhyperref]{\usebibmacro{cite}}}
+{\multicitedelim}
+{\usebibmacro{postnote}}
+
+% Hypereffing \citeyear
+\DeclareCiteCommand{\citeyear}
+{}
+{\bibhyperref{\printdate}}
+{\multicitedelim}
+{}
+
+% ': ' instead of '. p. '
+\renewbibmacro{in:}{}
+\DeclareFieldFormat{pages}{#1}
+\DeclareFieldFormat{postnote}{#1}
+\DeclareFieldFormat{multipostnote}{#1}
+\renewcommand*{\postnotedelim}{\addcolon\space}
+
+% Заменяем "и" на "&"
+% \renewcommand*{\finalnamedelim}{%
+	%    \ifnumgreater{\value{liststop}}{2}{\finalandcomma}{}%
+	%    \addspace\&\space}
+
+%\setlist[itemize]{leftmargin=*}
+%\setlist[itemize,1]{leftmargin=*, label=\ding{118}}
+%\setlist[itemize,2]{leftmargin=*, label=\raisebox{.25\height}{\tiny$\blacksquare$}}
+%\setlist[itemize,3]{leftmargin=*, label=--}
+%\setlist{itemsep=2pt, topsep=2pt}
+
+\renewcommand{\labelenumii}{\arabic{enumi}.\arabic{enumii}}
+\renewcommand{\labelenumiii}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}}
+\renewcommand{\labelenumiv}{\arabic{enumi}.\arabic{enumii}.\arabic{enumiii}.\arabic{enumiv}}
+\setlist[enumerate,1]{leftmargin=*,label=\textbf{\arabic*}.}
+\setlist[enumerate,2]{leftmargin=0pt,labelindent=0pt,itemindent=0pt}
+\setlist[enumerate,3]{leftmargin=0pt}
+\setlist{itemsep=2pt, topsep=2pt, leftmargin=*}
+
+\parskip 1mm
+
+% \linespread{1}
+
+\title{Морфосинтаксическая анкета к заявке проекта РНФ «Контроль и подъем в языках Евразии»: ицаринский язык}
+\author{Иван Калякин \\ \href{mailto:kalyakin.iv@gmail.com}{\texttt{\textcolor{black}{kalyakin.iv@gmail.com}}}}
+\date{}
+
+\begin{document}
+	
+	\maketitle
+	\thispagestyle{fancy}
+	
+	\pagestyle{fancy}
+	\fancyhead{}
+	\renewcommand{\headrulewidth}{0pt}
+	%\setlength{\headsep}{0.1in}
+	\fancyhead[L]{\footnotesize{Version 22.11.25}}
+	
+	\begin{enumerate}
+		\item \textbf{Границы клауз и множественность описания}
+		\begin{enumerate}
+			\item Доступна ли для изучаемого языка не зависящая от выбора формальной модели языка диагностика определения границ зависимой и главной клаузы (да / нет)
+			
+			\item[] Нет, универсальной диагностики определения границ клауз выявлено не было 
+			
+			%			\ex
+			%				\begingl
+			%					\gla //
+			%					\glb //
+			%					\glft `.' //
+			%				\endgl
+			%			\xe
+			
+			\item В некоторых случаях границы зависимой клаузы могут определяться более чем одним способом (да / нет)
+			
+			\item[] \textbf{Будет заполнено}
+			
+%			Да, в (1) имеет место дистантное согласование с абсолютивной ИГ зависимой клаузы. В подобных случаях можно предположить, что ИГ, являющаяся контролером согласования, находится либо на периферии зависимой клаузы (1а), либо передвигается в позицию объекта главной клаузы
+			
+%			\pex
+%			\a
+%				\begingl
+%					\glpreamble \textbf{Передвижение ИГ зависимой клаузы на левую периферию} //
+%					\gla musa-j $[$ @ xuˤ barc'ik'\textsubscript{\textit{i}} pat'ima-l \textit{t}\textsubscript{\textit{i}} d-arq'-ib-li$]$ d-ikː-u-li saj //
+%					\glb Musa-{\sc dat} {} five chudu.{\sc abs} Patimat-{\sc erg} {} {\sc npl}-make.{\sc pfv-aor-cvb} {\sc npl}-want.{\sc ipfv-prog-cvb} {\sc cop.m} //
+%				\endgl
+%			\a
+%				\begingl
+%					\glpreamble \textbf{Передвижение ИГ вложенной клаузы в главную клаузу} //
+%					\gla musa-j xuˤ barc'ik'\textsubscript{\textit{i}} $[$ @ pat'ima-l \textit{t}\textsubscript{\textit{i}} d-arq'-ib-li$]$ b-ikːʷ-il ca-w //
+%					\glb Musa-{\sc dat} five chudu.{\sc abs} {} Patimat-{\sc erg} {} {\sc npl}-make.{\sc pfv-aor-cvb} {\sc npl}-want.{\sc ipfv-cvb} {\sc cop-m} //
+%					\glft (a$=$b) `Али хочет, чтобы Патимат приготовила пять чуду.' //
+%				\endgl
+%			\xe
+			
+			\item В некоторых случаях состав главной клаузы может определяться более чем одним способом (да / нет)
+			
+			\item[] \textbf{Будет заполнено}
+			
+		\end{enumerate}
+		
+		
+		\item \textbf{Порядок слов, структура клаузы и клитики}
+		\begin{enumerate}
+			\item Какой в изучаемом языке базовый порядок слов
+			
+			\item[] Базовый порядок слов -- SXOV. Однако от данного стандарта возможны отклонения, обусловленные информационно-структурными причинами
+			
+			\ex
+			\begingl
+			\gla rasul-li musa-s hinc-bi d-ič-ib //
+			\glb Rasul-{\sc erg} Musa-{\sc dat} apple.{\sc abs-pl} {\sc npl}-give.{\sc pfv-aor} //
+			\glft `Расул дал Мураду яблоки.' //
+			\endgl
+			\xe
+			
+			\item Одинаковый ли порядок слов в главной и зависимой клаузе
+			
+			\item[] Да, базовый порядок слов в общем случае одинаковый
+			
+%			\ex 
+%				\begingl
+%				\gla du-l tːatːi-cːi $[$ @ ʁurš seːrʁ-an=da habiːbli$]$ b-urs-ib=da //
+%				\glb I-{\sc erg} father-{\sc inter} {} tomorrow come.\sc{pfv.m-pot-1} that {\sc n}-tell.{\sc pfv-aor=1} //
+%				\glft `Я сказал отцу, что завтра приду.' //
+%				\endgl
+%			\xe
+
+			\ex
+				\begingl
+					\gla tːatːi-l sakinat-i-cːi $[$ @ mazi b-aχː-in w-ik'ʷ-il$]$ b-urs-ib //
+					\glb father-{\sc erg} Sakinat-{\sc obl-inter} {} cat.{\sc abs} {\sc n}-feed.{\sc pfv-imp} {\sc m}-say.{\sc ipfv-cvb} {\sc n}-tell.{\sc pfv-aor} //
+					\glft `Отец сказал Сакинат покормить кошку.' //
+				\endgl
+			\xe
+						
+			\item Какие возможности размещения зависимой клаузы относительно главной (постпозиция, препозиция, гнездование) имеются
+			
+			\item[] Возможны все три способа размещения зависимой клаузы относительной главной. Наиболее частотно гнездование. Постпозиция обычно наблюдается в случае \textquote{крупных} зависимых клауз. Препозиция зависимой клаузы встречается реже всего; зачастую она имеет место в тех случаях, когда в главной клаузе опущены аргументные ИГ, что, соответственно, позволяет рассматривать данные предложения как конструкции с гнездованием 
+			
+			\pex
+			\a
+				\begingl
+					\glpreamble \textbf{Порядок SVO} //
+					\gla du-l xːar b-aˤʁ-ib=da $[$ @ rabdan saːʁ-ib-ceːl$]$ //
+					\glb I-{\sc erg} question {\sc n}-reach.{\sc pfv-aor=1} {} Rabadan.{\sc abs} come.{\sc pfv.m-aor-atr+iq} //
+				\endgl
+			\a
+				\begingl
+					\glpreamble \textbf{Порядок SOV} //
+					\gla du-l $[$ @ rabdan saːʁ-ib-ceːl$]$ xːar b-aˤʁ-ib=da //
+					\glb I-{\sc erg} {} Rabadan.{\sc abs} come.{\sc pfv.m-aor-atr+iq} question {\sc n}-reach.{\sc pfv-aor=1} //
+				\endgl
+			\a
+				\begingl
+					\glpreamble \textbf{Порядок OSV} //
+					\gla $[$ @ rabdan saːʁ-ib-ceːl$]$ du-l xːar b-aˤʁ-ib=da //
+					\glb {} Rabadan.{\sc abs} come.{\sc pfv.m-aor-atr+iq} I-{\sc erg} question {\sc n}-reach.{\sc pfv-aor=1} //
+				\endgl
+			\a
+				\begingl
+					\glpreamble \textbf{Порядок OV} //
+					\gla \textit{pro} $[$ @ rabdan saːʁ-ib-ceːl$]$ xːar b-aˤʁ-ib=da //
+					\glb {} {} Rabadan.{\sc abs} come.{\sc pfv.m-aor-atr+iq} question {\sc n}-reach.{\sc pfv-aor=1} //
+					\glft (a$=$b$=$c$=$d) `Я спросил, пришёл ли Рабадан.' //
+				\endgl
+			\xe
+			
+			\item Какая позиция (позиции) в изучаемом языке является фокусной (позицией линейно-акцентного выделения)
+			
+			\begin{enumerate}
+				
+				\item Позиция на левой периферии клаузы (CP)
+				
+				\item[] Передвижение фокусной составляющей не левую периферию в общем случае опционально. % Вероятно, имеет место влияние русского языка
+				
+				\ex
+					\begingl
+						\glpreamble \{Вопрос: Что отец купил?\} //
+						\gla mašin tːatːi-l asː-ib //
+						\glb car.{\sc abs} father-{\sc erg} take.{\sc pfv-aor} //
+						\glft `Отец купил машину.' //
+					\endgl
+				\xe
+				
+				\item Предглагольная позиция (..XV) 
+				
+				\item[] Стандартная позиция линейно-акцентного выделения
+				
+				\ex
+					\begingl
+						\glpreamble \{Вопрос: Что отец купил?\} //
+						\gla tːatːi-l mašin asː-ib //
+						\glb father-{\sc erg} car.{\sc abs} take.{\sc pfv-aor} //
+						\glft `Отец купил машину.' //
+					\endgl
+				\xe
+				
+				\item Иное
+				
+				\item[] Может использоваться акцентное выделение элемента без линейного перемещения, т.е. \textit{in situ}
+				
+			\end{enumerate}
+			
+			\item Возможны ли в изучаемом языке инверсии аргументов (argument scrambling), например, альтернации порядков SOV$\sim$OSV, VOS$\sim$VSO (да / нет)
+			
+			\item[] Да, отклонения от базового порядка слов сопровождаются информационно-структурными эффектами (отражено в переводе). Расположение аргументных ИГ за глагольной словоформой встречается относительно нечасто, причём в большинстве случаев имеет место порядок VSO
+			
+			\pex
+			\a
+				\begingl
+					\glpreamble \textbf{Порядок SOV} //
+					\gla tːatːi-l mašin asː-ib //
+					\glb father-{\sc erg} car.{\sc abs} take.{\sc pfv-aor} //
+					\glft `Отец купил машину.' //
+				\endgl
+			\a
+				\begingl
+					\glpreamble \textbf{Порядок OSV} //
+					\gla mašin tːatːi-l asː-ib //
+					\glb car.{\sc abs} father-{\sc erg} take.{\sc pfv-aor} //
+					\glft `Машину купил отец.' //
+				\endgl
+			\a
+				\begingl
+					\glpreamble \textbf{Порядок VSO} //
+					\gla asː-ib mašin tːatːi-l //
+					\glb take.{\sc pfv-aor} car.{\sc abs} father-{\sc erg} //
+					\glft `Отец машину купил.' //
+				\endgl
+			\xe
+			
+			\item Возможна ли в изучаемом языке инверсия глагола в пределах одного и то же типа клауз, например, альтернация порядков SV$\sim$VS (да / нет)
+			
+			\item[] Да. Порядок VS обычно предполагает, что предложение является тетическим, т.е. фокусу соответствует не только предикат, как при порядке SV, но и субъект, который в случае порядка SV топикален. Помимо этого, данный порядок, вероятно, следует рассматривать как возникший в результате размещения (передвижения или базового порождения) субъекта справа от глагола, занимающего в обеих конструкциях одну и ту же структурную позицию
+			
+			\pex
+			\a
+				\begingl
+					\glpreamble \textbf{Порядок SV} //
+					\gla bec' duc' b-uq-un //
+					\glb wolf.{\sc abs} run {\sc n}-move.{\sc pfv-aor} //
+					\glft `Волк побежал.' //
+				\endgl
+			\a
+				\begingl
+					\glpreamble \textbf{Порядок VS} //
+					\gla duc' b-uq-un bec' //
+					\glb run {\sc n}-move.{\sc pfv-aor} wolf.{\sc abs} //
+					\glft `Побежал волк.' //
+				\endgl
+			\xe
+			
+			\item Возможна ли в изучаемом языке инверсия дополнения по отношению к глагольной вершине, например, альтернация порядок OV$\sim$VO в пределах одного и того же типа клауз (да / нет)
+			
+			\item[] Да, при порядке SVO обычно имеет место фокусное выделение субъекта. Помимо этого, данный порядок слов довольно часто используется в начале нарративов
+			
+			\ex
+				\begingl
+					\gla tːatːi-l asː-ib mašin //
+					\glb father-{\sc erg} take.{\sc pfv-aor} car.{\sc abs} //
+					\glft `Машину купил отец.' //
+				\endgl
+			\xe
+			
+			\item Есть ли в изучаемом языке клитики (да / нет)
+			
+			\item[] Да, лично-числовые, вопросительные и др.
+			
+			\pex
+			\a
+				\begingl
+					\gla du tuxtur=\fbox{da} //
+					\glb I.{\sc abs} doctor={\sc 1} //
+					\glft `Я -- доктор.' //
+				\endgl
+			\a
+				\begingl
+					\gla u tuxtur=\fbox{di} //
+					\glb you.{\sc abs} doctor={\sc 2sg} //
+					\glft `Ты -- доктор.' //
+				\endgl
+			\xe
+			
+			\item Есть ли в изучаемом языке цепочки клитик (clitic clusters). Если да, каково правило внутреннего упорядочения клитик (clitic internal ordering, template rule) (да / нет)
+			
+			\item[] Да, относительно друг друга клитики жёстко упорядочены 
+			
+			\ex
+				\begingl
+					\glpreamble \textbf{Лично-числовая клитика предшествует вопросительной клитике} //
+					\gla ce b-irq'-an=da=n? //
+					\glb what.{\sc abs} {\sc n}-make.{\sc ipfv-pot=1=cq} //
+					\glft `Что будем делать?' //
+				\endgl
+			\xe
+			
+			\item Где находится позиция кластеризации клитик
+			
+			\item[] Обычно хостом клитик является глагольная словоформа, однако при аргументном фокусе клитики обычно присоединяются к фокусной группе
+			
+%			\ex
+%				\begingl
+%					\gla awtobus-uni \fbox{čina-d=re}? ħuša-li \fbox{ħa-b-alh-u-r=ra=w} awtobus-uni a-r-d-uq'-ni? //
+%					\glb bus.{\sc abs-pl} where-{\sc npl-pst+cq} you.{\sc pl-erg} {\sc neg-n}-know.{\sc ipfv-prog-cvb=2pl=pq} bus.{\sc abs-pl}  {\sc up-el-npl}-go.{\sc ipfv-msd} //
+%					\glft `Откуда автобусы? Вы не знаете, что автобусы уехали?' //
+%				\endgl
+%			\xe
+			
+			\item Имеются ли местоименные аргументы (клитики, связанные формы, аффиксы), встроенные в глагольный комплекс (да / нет)
+			
+			\item[] Нет
+		\end{enumerate}
+		
+		\item \textbf{Имеются ли в изучаемом языке конструкции}
+		\begin{enumerate}
+			\item Стандартного контроля (standard control) (да / нет)
+			
+			\item[] Да
+			
+			\ex
+				\begingl
+					\gla dam\textsubscript{\textit{i}} $[$ @ $\Delta$\textsubscript{\textit{i}} ca ka-b-ič-ib χabar b-urs-ij$]$ b-ikː-u-l=da //
+					\glb I.{\sc dat} {} {} one {\sc down-n}-fall.{\sc pfv-aor} story {\sc n}-tell.{\sc pfv-subj} {\sc n}-want.{\sc ipfv-aor-cvb=1} //
+					\glft `Я хочу рассказать правдивую историю.' //
+				\endgl
+			\xe
+			
+			\item Обратного контроля (backward control) (да / нет)
+			
+			\item[] Да
+			
+			\ex
+				\begingl
+					\gla $\Delta$\textsubscript{\textit{i}} $[$ @ du-l\textsubscript{\textit{i}} ca ka-b-ič-ib χabar b-urs-ij$]$ b-ikː-u-l=da //
+					\glb {} {} I-{\sc erg} one {\sc down-n}-fall.{\sc pfv-aor} story {\sc n}-tell.{\sc pfv-subj} {\sc n}-want.{\sc ipfv-aor-cvb=1} //
+					\glft `Я хочу рассказать правдивую историю.' //
+				\endgl
+			\xe
+			
+			\item Стандартного подъема несентенциального аргумента (forward raising) (да / нет)
+			
+			\item[] Да
+			
+			\ex
+				\begingl
+					\gla it\textsubscript{\textit{i}} $[$ @ $\Delta$\textsubscript{\textit{i}} du xːar Ø-urʁ-a-tːi$]$ w-aʡ Ø-iš-ib //
+					\glb this.{\sc abs} {} {} I.{\sc abs} question {\sc m}-reach.{\sc ipfv-prog-cvb} {\sc m}-begin {\sc m}-put.{\sc pfv-aor}  //
+					\glft `Он начал спрашивать меня.' //
+				\endgl
+			\xe
+			
+			\item Обратного подъема несентенциального аргумента (backward raising) (да / нет)
+			
+			\item[] Нет %  (136) on p. 43
+			
+%			\ex
+%				\begingl
+%					\gla \ljudge{*}$\Delta$\textsubscript{i} $[$ @ asijat-li\textsubscript{i} pamidur-ti a-d-aš-iq-u-li$]$ r-aħ r-iš-ib //
+%					\glb {} {} Asiyat-{\sc erg} tomato.{\sc abs-pl} {\sc up-npl}-walk.{\sc ipfv-caus-prog-cvb} {\sc f}-begin {\sc f}-put.{\sc pfv-aor} //
+%					\glft Ожид.: `Асият начала выращивать помидоры.' //
+%				\endgl
+%			\xe
+			
+			\item Подъема сентенциального аргумента, ср. субнорм. рус. \textit{Полиции стало известным}, $[$\textit{что Иван в городе}$]$ (да / нет)
+			
+			\item[] Нет
+			
+			\item С извлечением клитик (clitic climbing) (да / нет)
+			
+			\item[] Нет
+			
+			\item Объектного контроля (да / нет)
+			
+			\item[] Да
+			
+			\ex
+				\begingl
+					\gla tːatːi-l salikat-i-cːi\textsubscript{\textit{i}} $[$ @ $\Delta$\textsubscript{\textit{i}} mazi b-aχː-uj$]$ b-urs-ib //
+					\glb father-{\sc erg} Salikat-{\sc obl-inter} {} {} cat.{\sc abs} {\sc n}-feed.{\sc pfv-subj} {\sc n}-tell.{\sc pfv-aor} //
+					\glft `Отец сказал Саликат покормить кошку.' //
+				\endgl
+			\xe
+			
+			\item Косвенного контроля (да / нет)
+			
+			\item[] Нет
+			
+		\end{enumerate}
+		
+		\item \textbf{Синтаксическая область подъема}
+		\begin{enumerate}
+			\item Подъем из нефинитных клауз (да / нет)
+			
+			\item[] Да
+			
+			\ex
+				\begingl
+					\gla it\textsubscript{\textit{i}} $[$ @ $\Delta$\textsubscript{\textit{i}} du xːar Ø-urʁ-a-tːi$]$ w-aʡ Ø-iš-ib //
+					\glb this.{\sc abs} {} {} I.{\sc abs} question {\sc m}-reach.{\sc ipfv-prog-cvb} {\sc m}-begin {\sc m}-put.{\sc pfv-aor}  //
+					\glft `Он начал спрашивать меня.' //
+				\endgl
+			\xe
+			
+			\item Подъем из финитных клауз (hyperraising) (да / нет)
+			
+			\item[] Нет
+			
+%			\ex
+%				\begingl
+%					\gla \ljudge{*}ʡa\textsuperscript{ˤ}li-s pat'imat\textsubscript{\textit{i}} $[$ @ \textit{t}\textsubscript{\textit{i}} arc d-it-aq-iq-ib=ara at'-ib-li$]$ han b-irk-u-li sa<b>i //
+%					\glb Ali-{\sc dat} Patimat {} {} money.{\sc abs} {\sc npl-thither}-overcome.{\sc pfv-caus-aor=rq} say.{\sc pfv-aor-cvb} thought {\sc n}-fall.{\sc ipfv-prog-cvb} <{\sc n}>{\sc cop} //
+%					\glft Ожид.: `Али думает, что Патимат потеряла деньги.' //
+%				\endgl
+%			\xe
+			
+			\item Подъем из малых клауз (да / нет)
+			
+			\item[] Нет, однако ответ на данный вопрос в значительной мере зависит от анализа некоторых конструкций (например, сложных предикатов)
+			
+			\item Подъем квантора (да / нет)
+			
+			\item[] Да, однако данный процесс, как и в других языках, возможен лишь в пределах клаузы
+			
+			\ex % написать НР про то, что там не просто Б, а классный показатель
+				\begingl
+					\gla har tuxtur-ri kukk'abehelra ʡaˤrkːa ʡaˤħ Ø-irq'-a-tːi=di //
+					\glb each doctor-{\sc erg} some sick.{\sc abs} good {\sc m}-make.{\sc ipfv-prog-cvb=pst} //
+					\glft `Каждый доктор лечил какого-то больного.' \hfill ($\forall$ $\gg$ $\exists$; $\exists$ $\gg$ $\forall$) //
+				\endgl
+			\xe
+			
+%			\ex
+%				\begingl
+%					\gla har učitel\textsuperscript{j}-li-s $[$ @ pat'imat-li č'ʷal žuz-i d-elč'-uj$]$ b-ikː-u-li saj //
+%					\glb each teacher-{\sc obl-dat} {} Patimat-{\sc erg} two book.{\sc abs-pl} {\sc npl}-read.{\sc pfv-aor.cvb} {\sc n}-want.{\sc ipfv-prog-cvb} {\sc cop.m} //
+%					\glft `Каждый учитель хочет, чтобы Патимат прочитала две книги.' \hfill ($\forall$ $\gg$ 2; \textsuperscript{*}2 $\gg$ $\forall$) //
+%				\endgl
+%			\xe
+			
+			\item Подъем отрицания (ср. рус. \textit{Я не думаю, чтобы он мог выполнить эту работу}) (да / нет)
+			
+			\item[] Нет
+			
+			\item Внешний посессор
+			
+			\item[] Да
+			
+			\ex
+				\begingl
+					\gla di-la χːʷe te-b //
+					\glb I-{\sc gen} dog.{\sc abs} {\sc exst-n} //
+					\glft `У меня есть собака.' //
+				\endgl
+			\xe
+		\end{enumerate}
+		
+		\item \textbf{Биклаузальные структуры и реструктуризация}
+		\begin{enumerate}
+			\item Имеется ли диагностика, различающая биклаузальные структуры с контролем и подъемом от предложений с реструктуризацией (restructuring, clause union), т.е. снятием клаузальной границы между главной и зависимой предикацией (да / нет)
+			
+			\item[] Да, к таким диагностикам относятся: допустимость семантически интерпретируемого отрицания в главной и зависимой клаузе, допустимость использования двух обстоятельств одного типа, связывание сложных рефлексивов
+			
+			\textbf{Примеры будут добавлены}
+			
+%			\pex
+%			\a 
+%			\begingl
+%			\gla asijat(-li) pamidur-ti \fbox{ħa}-d-aš-iq-u-li r-aħ r-iš-ib //
+%			\glb Asiyat(-{\sc erg}) tomato.{\sc abs-pl} {\sc neg}-{\sc npl}-walk.{\sc ipfv-caus-prog-cvb} {\sc f}-begin {\sc f}-put.{\sc pfv-aor} //
+%			\glft `Асият прекратила выращивать помидоры.' (букв. `... начала не выращивать...') //
+%			\endgl
+%			\a
+%			\begingl
+%			\gla asijat(-li) pamidur-ti d-aš-iq-ul-i r-aħ \fbox{ħa}-r-iš-ib //
+%			\glb Asiyat(-{\sc erg}) tomato.{\sc abs-pl} {\sc npl}-walk.{\sc ipfv-caus-prog-cvb} {\sc f}-begin {\sc neg}-{\sc f}-put.{\sc pfv-aor} //
+%			\glft `Асият не начала выращивать помидоры.' //
+%			\endgl
+%			\xe
+%			
+%			\pex
+%			\begingl
+%			\gla \fbox{išħali} ʡaˤli-s $[$ @ pat'imat-li \fbox{č'aˤʡaˤl} šwal čutːu d-arq'-ib-li$]$ b-ikː-u-li saj //
+%			\glb today Ali-{\sc dat} {} Patimat-{\sc erg} tomorrow five chudu.{\sc abs} {\sc npl}-make.{\sc pfv-aor-cvb} {\sc n}-want.{\sc ipfv-prog-cvb} {\sc cop.m} //
+%			\glft `Сегодня Али хочет, чтобы завтра Патимат приготовила пять чуду.' //
+%			\endgl
+%			\xe
+%			
+%			\pex 
+%			\begingl
+%			\gla rasul-li\textsubscript{i} tuχtur-li-cːi\textsubscript{j} $[$ @ $\Delta$\textsubscript{j} $[$ @ sun-ni saj$]$\textsubscript{j $/$ *i} ʡaˤħ w-arq'-iq-ara$]$ tiledi b-arq'-ib //
+%			\glb Rasul-{\sc erg} doctor-{\sc obl-inter} {} {} {} {\sc self.obl-erg} {\sc self.m.abs} good {\sc m}-make.{\sc pfv-caus-inf} request {\sc n}-make.{\sc pfv-aor} //
+%			\glft `Расул попросил доктора, чтобы он вылечил себя.' //
+%			\endgl
+%			\xe
+			
+			\item Встречаются ли в изучаемом языке частично реструктуризованные предложения, совмещающие свойства биклаузальных и моноклаузальных структур (да / нет)
+			
+			\item[] Да. Например, каузативная конструкция
+			
+			\textbf{Примеры будут добавлены}
+			
+%			\ex 
+%			\begingl
+%			\glpreamble \textbf{Доступно две сферы действия отрицания} //
+%			\gla rasul-li Murad-li-cːi ʡičːa ħa-b-uc-iq-ib //
+%			\glb Rasul-{\sc erg} Murad-{\sc obl-inter} goat.{\sc abs} {\sc neg-n}-catch.{\sc pfv-aor} //
+%			\glft `Расул \{не\} заставил Мурада \{не\} поймать козу.' \hfill ({\sc caus} $\gg$ {\sc neg}; {\sc neg} $\gg$ {\sc caus}) //
+%			\endgl
+%			\xe
+%			
+%			\ex
+%			\begingl
+%			\glpreamble \textbf{Использование двух темпоральных наречий невозможно} //
+%			\gla \ljudge{*}\fbox{sːa} rasul-li \fbox{išħali} murad-li-cːi ʡičːa b-uc-iq-ib //
+%			\glb yesterday Rasul-{\sc erg} today Murad-{\sc obl-inter} goat.{\sc abs} {\sc n}-catch.{\sc pfv-caus-aor} //
+%			\glft Ожид.: `Вчера Расул заставил Мурада сегодня поймать козу.' //
+%			\endgl
+%			\xe
+			
+			
+			\item Имеются ли конструкции с дистантным пассивом (long passive) (да / нет)
+			
+			\item[] Нет
+		\end{enumerate}
+		
+		\item \textbf{Морфосинтаксис и аргументная структура}
+		\begin{enumerate}
+			\item Имеется ли в изучаемом языке падежное маркирование аргументов (да / нет)
+			
+			\item[] Да, в языке наличествуют грамматические падежи и локативные формы, которые традиционно рассматриваются как падежные, см. \parencite{SumbatovaMutalov2000}
+			
+			%			\ex
+			%				\begingl
+			%					\gla rasul-li musa-li-s ʡinc-bi d-ičː-ib //
+			%					\glb Rasul-{\sc erg} Musa-{\sc obl-dat} apple.{\sc abs-pl} {\sc npl}-give.{\sc pfv-aor} //
+			%					\glft `Расул дал Мураду яблоки.' //
+			%				\endgl
+			%			\xe
+			
+%			\begin{table}[H]
+%				\centering
+%				\begin{tabular}{lc} 
+%					\toprule
+%					\multicolumn{1}{c}{\textbf{Падеж}} & \multicolumn{1}{c}{\textbf{Показатель}} \\
+%					\midrule
+%					{\sc abs} & {\it -Ø} \\
+%					{\sc erg} & {\it -li} \\
+%					{\sc gen} & {\it -la} \\
+%					{\sc dat} & {\it -s} \\
+%					{\sc comit} & {\it -čuli} \\
+%					{\sc cont} & {\it -čilla} \\
+%					{\sc goal} & {\it -ha} \\
+%					{\sc prolat} & {\it -at\textipa{\textlengthmark}a} \\
+%					\bottomrule
+%				\end{tabular}
+%				\caption{Грамматические падежи в муиринском языке}
+%				\label{table_gram_cases}
+%			\end{table}
+%			
+%			\begin{table}[H]
+%				\centering
+%				\begin{tabular}{lcccc} 
+%					\toprule
+%					\multicolumn{1}{c}{\textbf{}} & \multicolumn{1}{c}{\sc lat} & \multicolumn{1}{c}{\sc ess} & \multicolumn{1}{c}{\sc elat} & \multicolumn{1}{c}{\sc all} \\
+%					\midrule
+%					{\sc super} & {\it -či}                               & {\it -či-{\sc agr}}                              & -{\it či-r(-ʡilli)}         & {\it -či-{\sc agr}-a\textsuperscript{ʕ}ħ} \\
+%					{\sc sub}   & {\it -ʔu}        & {\it -ʔu-{\sc agr}}                               & {\it -ʔu-r(-ʡilli)}         & {\it -ʔu-{\sc agr}-a\textsuperscript{ʕ}ħ} \\
+%					{\sc ad}    & {\it -ču}                               & {\it -ču-{\sc agr}}                              & {\it -ču-r(-ʡilli)}         & {\it -ču-{\sc agr}-a\textsuperscript{ʕ}ħ} \\
+%					{\sc inter} & {\it -c\textipa{\textlengthmark}i}                              & {\it -c\textipa{\textlengthmark}i-{\sc agr}}                             & {\it -c\textipa{\textlengthmark}i-r(-ʡilli)}         & {\it -c\textipa{\textlengthmark}i-{\sc agr}-a\textsuperscript{ʕ}ħ} \\
+%					{\sc in}    & {\it -ʡi} & {\it -ʡi-{\sc agr}} & {\it -ʡi-r(-ʡilli)} & {\it -ʡi-{\sc agr}-a\textsuperscript{ʕ}ħ} \\
+%					{\sc loc} & {\it -le} & {\it -le-{\sc agr}} & {\it -le-r(-ʡilli)} & {\it -le-{\sc agr}-a\textsuperscript{ʕ}ħ} \\
+%					% Раньше тут был футноут. Для этого используется функция \tablefootnote
+%					\bottomrule
+%				\end{tabular}
+%				\caption{Локативные формы в муиринском языке}
+%				\label{table_loc_cases}
+%			\end{table}
+			
+			\item Имеется ли в изучаемом языке дифференцированное маркирование аргументов (да / нет)
+			
+			\item[] Нет
+			
+			\item Имеются ли в изучаемом языке беспризнаковые (лишенные ненулевых показателей морфологического падежа) именные группы (да / нет)
+			
+			\item[] Да. Например, ИГ в позиции предиката
+			
+			\ex
+				\begingl
+					\gla nu tuxtur=da //
+					\glb I.{\sc abs} doctor={\sc 1}//
+					\glft `Я -- учитель.' //
+				\endgl
+			\xe
+			
+			\item Возможны ли в изучаемом языке биноминативные (биабсолютивные) предложения (да / нет)
+			
+			\item[] Да \parencite{SumbatovaMutalov2000}
+			
+			\ex
+				\begingl
+					\gla it $[$ @ arc d-irq'-an$]$ w-ih-ub //
+					\glb this.{\sc abs} {} money.{\sc abs} {\sc npl}-make.{\sc ipfv-pot} {\sc m}-become.{\sc pfv-aor} //
+					\glft `Он начал зарабатывать деньги.' //
+				\endgl
+			\xe
+			
+			\item Какой (синтаксический и семантический) актант контролирует согласование предиката (Подлежащее, Агенс, Принципал, и проч.)
+			
+			\item[] Предикативное согласование контролируется абсолютивной ИГ вне зависимости от её семантической роли
+			
+			\ex
+				\begingl
+					\gla murad-li pat'ima *w- @ $/$ @ r-uc-ib //
+					\glb Murad-{\sc erg} Patimat.{\sc abs} *{\sc m}- $/$ {\sc f}-catch.{\sc pfv-aor} //
+					\glft `Мурад поймал Патимат.' //
+				\endgl
+			\xe
+			
+			\item Имеются ли основание постулировать морфологический падеж для невыраженного субъекта зависимой предикации (PRO). Какой (какие именно)
+			
+			\item[] Да, имеются. Падеж нулевого местоимения будет зависеть от переходности и типа вложенного предиката. Это можно увидеть, например, в контекстах связывания сложных рефлексивов, один из компонентов которых копирует падеж антецедента. Поскольку PRO обязательно является подлежащим, данное местоимение может быть оформлено абсолютивом, эргативом или дативом
+			
+			\pex
+%			\a 
+%				\begingl
+%					\glpreamble \textbf{Нулевое подлежащее в абсолютиве} //
+%					\gla rasul-li-s\textsubscript{\textit{i}} $[$ @ $\Delta$\textsubscript{\textit{i}} $[$ @ sun-i-či-w saj$]$\textsubscript{\textit{i}} dukal ka-jk'ʷ-ara$]$ b-ikː-u-li saj //
+%					\glb Rasul-{\sc obl-dat} {} {} {} {\sc self.obl-obl-super-m} {\sc self.abs} laughter {\sc down-m}-say.{\sc ipfv-inf} {\sc n}-want.{\sc ipfv-prog-cvb} {\sc cop.m} //
+%					\glft `Расул хочет посмеяться над собой.' //
+%				\endgl
+%			\a
+				\begingl
+				\glpreamble \textbf{Нулевое подлежащее в эргативе} //
+					\gla rasul-li-s\textsubscript{\textit{i}} $[$ @ $\Delta$\textsubscript{\textit{i}} $[$ @ cin-ni ca-w$]$\textsubscript{\textit{i}} gap w-arq'-ara$]$ b-ikːʷ-il ca-w //
+					\glb Rasul-{\sc obl-dat} {} {} {} {\sc self.obl-erg} {\sc self.abs-m} praise {\sc m}-make.{\sc pfv-inf} {\sc n}-want.{\sc ipfv-prog-cvb} {\sc cop.m} //
+					\glft `Расул хочет похвалить себя.' //
+				\endgl
+			%				\a
+			%					\begingl
+			%						\gla //
+			%						\glb //
+			%						\glft `.' //
+			%					\endgl
+			\xe
+			
+			\item Имеется ли в изучаемом языке гармонизация клауз по переходности (transitive concord), когда при непереходном предикате в зависимой клаузе требуется непереходный предикат в главной клаузе, а при переходном предикате в главной клаузе требуется переходный предикат в главной клаузе (да / нет)
+			
+			\item[] \textbf{Будет заполнено} % Да, однако данный феномен ограничен лишь сложным предикатом со значением `заканчивать'
+			
+%			\pex
+%			\a
+%			\begingl
+%			\glpreamble \textbf{Переходный матричный предикат и переходный вложенный предикат } //
+%			\gla rasul-li žuz-i luk'-u-li taman d-arq'-ib //
+%			\glb Rasul-{\sc erg} book.{\sc abs-pl} write.{\sc ipfv-prog-cvb} finish {\sc npl-make.pfv-aor} //
+%			\glft `Расул закончил писать книги.' //
+%			\endgl
+%			\a 
+%			\begingl
+%			\glpreamble \textbf{Непереходный матричный предикат и непереходный вложенный предикат } //
+%			\gla murad ʁaj ka-Ø-jk'-u-li taman Ø-irh-u-li saj //
+%			\glb Murad.{\sc abs} word {\sc down-m}-say.{\sc ipfv-prog-cvb} finish {\sc m}-become.{\sc ipfv-prog-cvb} {\sc cop.m} //
+%			\glft `Мурад заканчивает разговаривать.' //
+%			\endgl
+%			\a 
+%			\begingl
+%			\glpreamble \textbf{Непереходный матричный предикат и переходный вложенный предикат } //
+%			\gla \ljudge{*}rasul žuz-i luk'-u-li taman w-Ø-ib // 
+%			\glb Rasul.{\sc abs} book.{\sc abs-pl} write.{\sc ipfv-prog-cvb} finish {\sc m}-become.{\sc pfv-aor} //
+%			\glft Ожид.: `Расул закончил писать книги.' //
+%			\endgl
+%			\a 
+%			\begingl
+%			\glpreamble \textbf{Переходный матричный предикат и непереходный вложенный предикат } //
+%			\gla \ljudge{*}murad-li ʁaj ka-jk'-u-li taman d-irq'-u-li saj //
+%			\glb Murad-{\sc erg} word {\sc down-m}-say.{\sc ipfv-prog-cvb} finish {\sc npl}-make.{\sc ipfv-prog-cvb} {\sc cop.m} //
+%			\glft Ожид.: `Мурад заканчивает разговаривать.' //
+%			\endgl
+%			\xe
+			
+			\item Имеется ли в изучаемом языке противопоставление клауз по степени агентивности, когда при неагентивном предикате в главной клаузе предикат зависимой клаузы должен быть агентивным (да / нет)
+			
+			\item[] Нет
+		\end{enumerate}
+		
+		\item \textbf{Морфосинтаксический тип зависимой предикации в структурах контроля и подъема}
+		\begin{enumerate}
+			\item Финитная клауза без подчинительного союза (complementizer)
+			
+			\item[] Не релевантно
+			
+			%			\item[] Нет, финитные клаузы вводятся с помощью либо показателя косвенного вопроса =\textit{al}, либо полуграмматикализованных комплементайзеров, образованных от глаголов {\sc agr}-\textit{ik'} `say.{\sc ipfv}' и \textit{at'} `say.{\sc pfv}'
+			
+			%			\ex
+			%				\begingl
+			%					\gla //
+			%					\glb //
+			%					\glft `.' //
+			%				\endgl
+			%			\xe
+			
+			\item Финитная клауза с подчинительным союзом
+			
+			\item[] Не релевантно
+			
+			%			\item[] Да
+			%			
+			%			\ex
+			%				\begingl
+			%					\gla rasul-li $[$ @ sen-sen musa-li pat'imat r-iq-aˤb=\fbox{al}$]$ či-b-Ø-ab //
+			%					\glb Rasul-{\sc erg} {} why-why Musa-{\sc erg} Patimat.{\sc abs} {\sc f}-injure.{\sc pfv-aor=iq} {\sc on-n}-become.{\sc pfv-aor} //
+			%					\glft `Расул видел, как Муса поранил Патимат.' //
+			%				\endgl
+			%			\xe
+			%			
+			%			\ex
+			%				\begingl
+			%					\gla zajnab $[$ @ hani ʡič-ni bic'-li d-ukː-a \fbox{r-ik'-u-li}$]$ uruχ k'-u-li sa<r>i  //
+			%					\glb Zainab.{\sc abs} {} every goat.{\sc abs-pl} wolf-{\sc erg} {\sc npl}-eat.{\sc ipfv-th} {\sc f}-say.{\sc ipfv-prog-cvb} fear say.{\sc ipfv-prog-cvb} <{\sc f}>{\sc cop} //
+			%					\glft `Зайнаб боится, что волк съест всех коз.' //
+			%				\endgl
+			%			\xe
+			%			
+			%			\ex
+			%				\begingl
+			%					\gla ʡa\textsuperscript{ˤ}li-s $[$ @ pat'imat-li arc d-it-aq-iq-ib=ara \fbox{at'-ib-li}$]$ han b-irk-u-li sa<b>i //
+			%					\glb Ali-{\sc dat} {} Patimat-{\sc erg} money.{\sc abs} {\sc npl-thither}-overcome.{\sc pfv-caus-aor=rq} say.{\sc pfv-aor-cvb} thought {\sc n}-fall.{\sc ipfv-prog-cvb} <{\sc n}>{\sc cop} //
+			%					\glft `Али думает, что Патимат потеряла деньги.' //
+			%				\endgl
+			%			\xe
+			
+			\item Нефинитная клауза, в том числе:
+			\begin{enumerate}
+				\item Причастная
+				
+				\item[] Не релевантно
+				
+				\item Деепричастная
+				
+				\item[] Да, однако в большинстве случаев деепричастные зависимые клаузы используются при отсутствии кореферентности у субъектов матричной и зависимой клаузы
+				
+				\ex
+					\begingl
+						\gla murad-li\textsubscript{\textit{i}} $[$ @ $\Delta$\textsubscript{\textit{i}} qal b-erxː-ul-li$]$ taman b-aˤrq'-ib //
+						\glb Murad-{\sc erg} {} {} house.{\sc abs} {\sc n}-paint.{\sc pfv-aor-cvb} finish {\sc n}-make.{\sc pfv-aor} //
+						\glft `Мурад закончил красить дом.' //
+					\endgl
+				\xe
+				
+%				\ex
+%				\begingl
+%				\gla ʡaˤli-s $[$ @ pat'imat-li šwal čutːu d-arq'-ib-li$]$ b-ikː-u-li saj //
+%				\glb Ali-{\sc dat} {} Patimat-{\sc erg} five chudu.{\sc abs} {\sc npl}-make.{\sc pfv-aor-cvb} {\sc n}-want.{\sc ipfv-prog-cvb} {\sc cop.m} //
+%				\glft `Али хочет, чтобы Патимат приготовила пять чуду.' //
+%				\endgl
+%				\xe
+				
+				\item Выраженная номинализацией
+				
+				\item[] Не релевантно
+				
+				%					\item[] Да
+				%					
+				%					\ex
+				%						\begingl
+				%							\gla murad-li $[$ @ ʡaˤli-li pat'imat r-iq-ni-li-čilla$]$ arʁ-ib //
+				%							\glb Murad-{\sc erg} {} Ali-{\sc erg} Patimat.{\sc abs} {\sc f}-injure.{\sc pfv-msd-obl-cont} understand.{\sc pfv-aor} //
+				%							\glft `Мурад слышал, что Али поранил Патимат.' //
+				%						\endgl
+				%					\xe
+			\end{enumerate}
+			
+		\end{enumerate}
+		
+		\item \textbf{Прозрачное согласование и его манифестация в полипредикатных структурах}
+		\begin{enumerate}
+			\item Имеется ли в изучаемом языке прозрачное согласование главного предиката с аргументом зависимой клаузы (да / нет)
+			
+			\item[] \textbf{Будет заполнено}
+			
+%			\ex
+%			\begingl
+%			\gla ʡaˤli-s $[$ @ pat'imat-li šwal čutːu d-arq'-ib-li$]$ b- @ $/$ @ d-ikː-u-li saj //
+%			\glb Ali-{\sc dat} {} Patimat-{\sc erg} five chudu.{\sc abs} {\sc npl}-make.{\sc pfv-aor-cvb} {\sc n}- $/$ {\sc npl}-want.{\sc ipfv-prog-cvb} {\sc cop.m} //
+%			\glft `Али хочет, чтобы Патимат приготовила пять чуду.' //
+%			\endgl
+%			\xe
+			
+			\item С помощью каких согласовательных категорий (число, род, класс, лицо и т.д.) оно может проверяться
+			
+			\item[] \textbf{Будет заполнено}
+			
+			\item Имеются ли в изучаемом языке предикаты, для которых прозрачное согласование обязательно (да / нет)
+			
+			\item[] \textbf{Будет заполнено} %Нет. Единственным исключением могут считаться аспектуальные предикаты, по-видимому, предполагающие структуры с реструктурированием
+			
+%			\ex
+%			\begingl
+%			\gla asijat-li pamidur-ti a-d-aš-iq-u-li *b- @ $/$ @ d-aħ *b- @ $/$ @ d-iš-ib //
+%			\glb {\sc pn-erg} tomato.{\sc abs-pl} {\sc up-npl}-walk.{\sc ipfv-caus-prog-cvb} *{\sc n}- $/$ {\sc npl}-begin *{\sc n}- $/$ {\sc npl}-put.{\sc pfv-aor} //
+%			\glft `Asiyat has started growing tomatoes.' //
+%			\endgl
+%			\xe
+			
+			\item Имеются ли расхождения между носителями языка в плане допустимости прозрачного согласования (да / нет)
+			
+			\item[] \textbf{Будет заполнено}
+			
+			\item Происходит ли изменение линейного порядка при прозрачном согласовании
+			
+			\item[] \textbf{Будет заполнено} % Нет, корреляции между наличием дистантного согласования и линейной позицией контролера нет: ИГ-контролер согласования может располагаться \textit{in situ}
+			
+			\item Семантика конструкции с прозрачным согласованием
+			
+			\item[] \textbf{Будет заполнено} % ИГ, выступающая в качестве контролера согласования, обычно интерпретируется либо как топик, либо как фокус
+			
+%			\ex
+%			\begingl
+%			\gla musa-li rasul-li-cːi $[$ @ pat'imat=\fbox{gina} gap r-arq'-iq-ara$]$ tiledi \textsuperscript{??}b- @ $/$ @ r-arq'-ib //
+%			\glb Musa-{\sc erg} Rasul-{\sc obl-inter} {} Patimat.{\sc abs=\fbox{foc}} praise {\sc f}-make.{\sc pfv-caus-inf} request \textsuperscript{??}{\sc n}- $/$ {\sc f}-make.{\sc pfv-aor} //
+%			\glft `Муса попросил Расула похвалить лишь Патимат.' //
+%			\endgl
+%			\xe
+			
+			\item Форма зависимого предиката в конструкции с прозрачным согласованием
+			
+			\item[] \textbf{Будет заполнено} % Инфинитив, деепричастие, масдар, финитная форма
+			
+%			\pex
+%			\a
+%			\begingl
+%			\glpreamble \textbf{Инфинитивная зависимая клауза} //
+%			\gla pat'imat-li murad-li-cːi $[$ @ uncːa hark d-arq'-iq-ara$]$ tiledi b- @ $/$ @ d-arq'-ib //
+%			\glb Patimat-{\sc erg} Murad-{\sc obl-inter} {} door.{\sc abs} open {\sc npl}-make.{\sc pfv-caus-inf} request {\sc n}- $/$ {\sc npl}-make.{\sc pfv-aor} //
+%			\glft `Патимат попросила Мурада открыть двери.' //
+%			\endgl
+%			\a
+%			\begingl
+%			\glpreamble \textbf{Конвербная зависимая клауза} //
+%			\gla ʡaˤli-s $[$ @ pat'imat-li šwal čutːu d-arq'-ib-li$]$ b- @ $/$ @ d-ikː-u-li saj //
+%			\glb Ali-{\sc dat} {} Patimat-{\sc erg} five chudu.{\sc abs} {\sc npl}-make.{\sc pfv-aor-cvb} {\sc n}- $/$ {\sc npl}-want.{\sc ipfv-prog-cvb} {\sc cop.m} //
+%			\glft `Али хочет, чтобы Патимат приготовила пять чуду.' //
+%			\endgl
+%			\a
+%			\begingl
+%			\glpreamble \textbf{Масдарная зависимая клауза} //
+%			\gla zajnab-li $[$ @ mutal ahi k'-u-li w-iʔ-ni$]$ b- @ $/$ @ w-alh-u-li sa<r>i //
+%			\glb Zainab-{\sc erg} {} Mutal.{\sc abs} sick say.{\sc ipfv-prog-cvb} {\sc m}-be.{\sc ipfv-msd} {\sc n}- $/$ {\sc m}-know.{\sc ipfv-prog-cvb} <{\sc f}>{\sc cop} //
+%			\glft `Зайнаб знает, что Мутал болеет.' //
+%			\endgl
+%			\a 
+%			\begingl
+%			\glpreamble \textbf{Финитная зависимая клауза} //
+%			\gla ʡaˤli-s $[$ @ pat'imat-li arc  d-it-aq-iq-ib=ara w-ik'-u-li$]$ han b- @ $/$ @ d-irk-u-li saj //
+%			\glb Ali-{\sc dat} {} Patimat-{\sc erg} money.{\sc abs} {\sc npl-thither}-overcome.{\sc pfv-caus-aor=rq} {\sc m}-say.{\sc ipfv-aor-cvb} thought {\sc n}- $/$ {\sc npl}-fall.{\sc ipfv-prog-cvb} {\sc cop.m} //
+%			\glft `Али думает, что Патимат потеряла деньги.' //
+%			\endgl
+%			\xe
+			
+		\end{enumerate}
+		
+		\item \textbf{Индексальный сдвиг}
+		\begin{enumerate}
+			\item Встречается в ли в изучаемом языке индексальный сдвиг, где показатель ближнего дейксиса (`я', `ты', `здесь', `сейчас') переносится в интенсиональный контекст, связанный с говорящим, отличным от субъекта высказывания, ср. субнорм. рус. \textit{Иван\textsubscript{\textit{i}} сказал, что я\textsubscript{\textit{i}} ушел} $=$ `Иван\textsubscript{\textit{i}} сказал, что он\textsubscript{\textit{i}} ушел'; (да / нет)
+			
+			\item[] Да
+			
+			\ex
+				\begingl
+					\gla musa-li $[$ @ du-l rasul či-w-ig-a-tːa$]$ w-ik'ʷ-ar  //
+					\glb Musa-{\sc erg} {} I-{\sc erg} Rasul.{\sc abs} {\sc on-m-lv-prog-1} {\sc m}-say.{\sc ipfv-th} //
+					\glft `Муса говорит, что я $/$ он видит Расула.' //
+				\endgl
+			\xe
+			
+			\item В каких контекстах возможен индексальный сдвиг
+			
+			\item[] При передачи чужой речи или мнения
+			
+			\item Какие предикаты допускают индексальный сдвиг
+			
+			\item[] Предикаты речи и мышления
+			
+			\item Имеются ли расхождения между говорящими в плане допустимости индексального сдвига (да / нет)
+			
+			\item[] Нет
+			
+			\item Может ли индексальный сдвиг быть связан в изучаемом языке с морфосинтаксическим маркированием зависимой клаузы (да / нет)
+			
+			\item[] Индексальный сдвиг ограничен финитными зависимыми клаузами
+			
+			\item Возможен/обязателен ли индексальный сдвиг для обстоятельств времени и места и временных глагольных форм (здесь, сейчас, ср. рус. \textit{Иван сказал}: «\textit{Я сейчас уйду}» -- \textit{Иван сказал, что он} (*\textit{сейчас}) \textit{собирается уходить})
+			
+			\item[] Да, возможен 
+			
+			\ex
+			\begingl
+			\gla //
+			\glb //
+			\glft `Вчера Муса сказал, что завтра он поедет в Санжи.' (на след. день после акта речи) //
+			\endgl
+			\xe
+		\end{enumerate}
+		
+		\item \textbf{Актантная деривация и структура полипредикатного комплекса}
+		\begin{enumerate}
+			\item Можно ли в изучаемом языке четко поделить зависимые клаузы на актантные и обстоятельственные (да / нет)
+			
+			\item[] Нет, универсальная диагностика отсутствует, однако в большинстве случаев актантные клаузы занимают позицию абсолютивного аргумента %, некоторые зависимые клаузы (например, возглавляемые простым деепричастием) демонстрируют смешанные свойства
+			
+			\item Имеются ли основания считать, что сентенциальные и несентенциальные актанты занимают одни и те же синтаксические позиции при том же предикате главной клаузы, ср. рус. \textit{Иван видит Петра} и \textit{Иван видит, что Петр ошибся} (да / нет)
+			
+			\item[] Да, на это указывает то, что при наличии клаузального актанта отсутствует абсолютивная ИГ-прямое дополнение
+			
+			\textbf{Примеры будут добавлены}
+			
+%			\pex
+%			\a
+%			\begingl
+%			\gla musa-li $[$ @ χabar žahil-diš-li-čilla$]$ taman b-irq'-u-li saj //
+%			\glb Musa-{\sc erg} {} story.{\sc abs} young-{\sc nmlz-obl-cont} finish {\sc n}-make.{\sc ipfv-prog-cvb} {\sc cop.m} //
+%			\glft `Муса заканчивает рассказывать историю о своём детстве.' //
+%			\endgl
+%			\a
+%			\begingl
+%			\gla asijat-li $[$ @ pamidur-ti a-d-aš-iq-u-li$]$ taman d-arq'-ib //
+%			\glb Asiyat-{\sc erg} {} tomato.{\sc abs-pl} {\sc up-npl}-walk.{\sc ipfv-caus-prog-cvb} finish {\sc npl}-make.{\sc pfv-aor} //
+%			\glft `Асият закончила выращивать помидоры.' //
+%			\endgl
+%			\xe
+			
+			\item Имеются ли механизмы добавления актантов (аппликативные стратегии), общие для сентенциальных и несентенциальных актантов (да / нет)
+			
+			\item[] Нет, каузатив, единственная повышающая актантная деривация, позволяет добавлять лишь именные аргументы
+			
+			\item Имеются ли в описываемом языке структуры с внешним посессором (да / нет)
+			
+			\item[] Да
+			
+			\ex
+				\begingl
+					\gla di-la χːʷe te-b //
+					\glb I-{\sc gen} dog.{\sc abs} {\sc exst-n} //
+					\glft `У меня есть собака.' //
+				\endgl
+			\xe
+			
+			\item Возможно ли посессивное маркирование сентенциальных актантов (да / нет)
+			
+			\item[] Нет
+			
+			\item Имеются ли в изучаемом языке грамматические и лексические маркеры снижения агентивности / степени контролируемости ситуации (да / нет)
+			
+			\item[] Да, лексические (наречия со значением `случайно', `неспециально' и др.). Грамматические средства пока не изучены %при антипассивизации стандартно динамический предикат интерпретируется как стативный
+			
+%			\pex
+%			\a
+%			\begingl
+%			\glpreamble \textbf{Исходная диатеза} //
+%			\gla učeniku-n-a-li barhu-barhuli žuz-i d-uč'-u-li sa<b>i //
+%			\glb students-{\sc pl-obl.pl-erg} on.purpose book.{\sc abs-pl} {\sc npl-read.ipfv-prog-cvb} {\sc <hpl>cop} //
+%			\glft `Ученики специально читают много книг.' //
+%			\endgl
+%			\a
+%			\begingl
+%			\glpreamble \textbf{Антипассивная диатеза} //
+%			\gla učeniku-ni ( @ \textsuperscript{\#}barhu-barhuli) žuz-Ø-a-li b-uč'-u-li sa<b>i //
+%			\glb students-{\sc pl} {} on.purpose book.{\sc abs-pl-obl.pl-erg} {\sc hpl-read.ipfv-prog-cvb} {\sc <hpl>cop} //
+%			\glft `Ученики занимаются чтением книг.' //
+%			\endgl
+%			\xe
+			
+			\item Имеются ли в изучаемом языке грамматические и лексические маркеры повышения агентивности / степени контролируемости ситуации (да / нет)
+			
+			\item[] Да, агентивные наречия. В случае крайне семантически неспецифицированной каузативной конструкции наличие таких наречий задаёт строго каузативное прочтение, а не, например, пермиссивное
+			
+%			\pex
+%			\a
+%			\begingl
+%			\gla mutaj-li musa-cːi šaˤšk'a b-urʡaˤ-jq-ib //
+%			\glb Mutai-{\sc erg} Musa-{\sc inter} plate.{\sc abs} {\sc n}-break.{\sc pfv-caus-aor} //
+%			\glft `Мутай \{заставил $/$ позволил $/$ разрешил\} Мусе разбить тарелку.' //
+%			\endgl
+%			\a
+%			\begingl
+%			\gla mutaj-li balhu-balhuli musa-cːi šaˤšk'a b-urʡaˤ-jq-ib //
+%			\glb Mutai-{\sc erg} on.purpose Musa-{\sc inter} plate.{\sc abs} {\sc n}-break.{\sc pfv-caus-aor} //
+%			\glft `Мутай специально \{заставил $/$ \textsuperscript{\#}позволил $/$ \textsuperscript{\#}разрешил\} Мусе разбить тарелку.' //
+%			\endgl
+%			\xe
+		\end{enumerate}
+		
+		\item \textbf{Какие синтаксические конструкции (контроль, подъем, иное) выбирают в изучаемом языке}
+		\begin{enumerate}
+			\item Глаголы речи
+			
+			\item[] Иное, финитная зависимая клауза
+			
+			\ex
+				\begingl
+					\gla murad $[$ @ nišːa-la sːakːa učitil=da$]$ w-ik'ʷ-ar //
+					\glb Murad.{\sc abs} {} we.{\sc gen} new teacher={\sc 1} {\sc m}-say.{\sc ipfv-th} //
+					\glft `Мурад говорит, что он наш новый учитель.' //
+				\endgl
+			\xe
+			
+			\item Глаголы речевой каузации, ср. \textit{приказать}, \textit{попросить}
+			
+			\item[] Контроль, зависимая клауза в форме инфинитива. Иное, вложенный императив
+			
+			\ex
+				\begingl
+					\gla tːatːi-l salikat-i-cːi\textsubscript{\textit{i}} $[$ @ $\Delta$\textsubscript{\textit{i}} mazi b-aχː-uj$]$ b-urs-ib //
+					\glb father-{\sc erg} Salikat-{\sc obl-inter} {} {} cat.{\sc abs} {\sc n}-feed.{\sc pfv-subj} {\sc n}-tell.{\sc pfv-aor} //
+					\glft `Отец сказал Саликат покормить кошку.' //
+				\endgl
+			\xe
+			
+			\ex
+				\begingl
+					\gla tːatːi-l sakinat-i-cːi $[$ @ mazi b-aχː-in w-ik'ʷ-il$]$ b-urs-ib //
+					\glb father-{\sc erg} Sakinat-{\sc obl-inter} {} cat.{\sc abs} {\sc n}-feed.{\sc pfv-imp} {\sc m}-say.{\sc ipfv-prog} {\sc n}-tell.{\sc pfv-aor} //
+					\glft `Отец сказал Сакинат покормить кошку.' //
+				\endgl
+			\xe
+			
+			\item Ментальные глаголы, ср. \textit{думать}, \textit{считать}, \textit{предполагать}
+			
+			\item[] Иное, финитная зависимая клауза
+			
+			\ex
+				\begingl
+					\gla dam $[$ @ čak'alči seːrʁ-an-ni w-ik'ʷ-il$]$ han b-irk-a-tːeːkːu //
+					\glb I.{\sc dat} {} anybody.{\sc abs} come.\sc{pfv.m-pot-fut} {\sc m}-say.{\sc ipfv-cvb} thought {\sc n}-fall.{\sc ipfv-prog-conv+neg} //
+					\glft `Али думает, что Патимат потеряла деньги.' //
+				\endgl
+			\xe
+			
+			\item Глаголы чувственного восприятия, ср. \textit{видеть}, \textit{слышать}
+			
+			\item[] \textbf{Будет заполнено}
+			
+%			\pex
+%			\a
+%			\begingl
+%			\gla rasul-li či-b-Ø-ab $[$ @ sabijat-li musa gap w-arq'-ib-li$]$ //
+%			\glb Rasul-{\sc erg} {\sc super-n}-become.{\sc pfv-aor} {} Sabiyat-{\sc erg} Musa.{\sc abs} praise {\sc m}-make.{\sc pfv-aor-cvb} //
+%			\endgl
+%			\a
+%			\begingl
+%			\gla rasul-li či-b-Ø-ab $[$ @ sabijat-li musa gap w-arq'-ni$]$ //
+%			\glb Rasul-{\sc erg} {\sc super-n}-become.{\sc pfv-aor} {} Sabiyat-{\sc erg} Musa.{\sc abs} praise {\sc m}-make.{\sc pfv-msd}//
+%			\glft (a$=$b) `Расул видел, что Сабият похвалила Мусу.' //
+%			\endgl
+%			\xe
+			
+			\item Глаголы со значением `казаться'
+			
+			\item[] \textbf{Будет заполнено}
+			
+			\item Глаголы корректировки представления (`оказаться'), ср. рус. \textit{Фильм оказался воспевающим понятие «Офицерская Честь»}
+			
+			\item[] \textbf{Будет заполнено}
+			
+			\item Фазовые глаголы, ср. \textit{начинать}, \textit{продолжать}, \textit{завершать}
+			
+			\item[] Контроль или подъём, зависимая клауза в форме конверба или инфинитива 
+			
+			\pex
+			%				\a
+				\begingl
+					\gla murad-li $[$ @ qal b-erxː-ul-li$]$ taman b-aˤrq'-ib //
+					\glb Murad-{\sc erg} {} house.{\sc abs} {\sc n}-paint.{\sc pfv-aor-cvb} finish {\sc n}-make.{\sc pfv-aor} //
+					\glft `Мурад закончил красить дом.' //
+				\endgl
+			%				\a
+			%					\begingl
+			%						\gla //
+			%						\glb //
+			%						\glft `.' //
+			%					\endgl
+			\xe
+			
+			\item Глаголы со значениями `произойти', `случиться'
+			
+			\item[] \textbf{Будет заполнено}
+			
+			\item Глаголы и неглагольные предикаты со значением `иметь тенденцию к осуществлению', ср. \textit{собирается дождь}, \textit{вот-вот пойдет дождь}
+			
+			\item[] \textbf{Будет заполнено}
+			
+			\item Глаголы волеизъявления и сильного желания (волитивные)
+			
+			\item[] Контроль при инфинитивном зависимом и отсутствие контроля при конвербном зависимом
+			
+			%Инфинитив или деепричастие в зависимости от того, совпадает ли референт, соответствующий субъекту матричной и зависимой клаузы
+			
+			\pex
+%			\a
+				\begingl
+					%\glpreamble \textbf{При инфинитивном зависимом референция субъектов совпадает} // 
+					\gla dam\textsubscript{\textit{i}} $[$ @ $\Delta$\textsubscript{\textit{i}} ca ka-b-ič-ib χabar b-urs-ij$]$ b-ikː-u-l=da //
+					\glb I.{\sc dat} {} {} one {\sc down-n}-fall.{\sc pfv-aor} story {\sc n}-tell.{\sc pfv-subj} {\sc n}-want.{\sc ipfv-aor-cvb=1} //
+					\glft `Я хочу рассказать правдивую историю.' //
+				\endgl
+%			\a
+%			\begingl
+%			\glpreamble \textbf{При конвербном зависимом референция субъектов не совпадает} //
+%			\gla rasul-li-s\textsubscript{\textit{i}} $[$ @ $\Delta$\textsubscript{\textit{j}} musa gap w-arq'-ib-li$]$ b-ikː-u-li saj //
+%			\glb Rasul-{\sc obl-dat} {} {} Musa.{\sc abs} praise {\sc m}-make.{\sc pfv-aor-cvb} {\sc n}-want.{\sc ipfv-prog-cvb} {\sc cop.m} //
+%			\glft `Расул хочет, чтобы кто-то похвалил Мусу.' //
+%			\endgl
+			\xe
+			
+			\item Модальные глаголы, в том числе:
+			\begin{enumerate}
+				\item В контекстах деонтической, алетической и эпистемической модальности, ср. рус. \textit{Иван может поехать туда вместо меня} `Ивану разрешено сделать p'
+				
+				\item[] \textbf{Будет заполнено}
+				
+				%				\ex
+				%					\begingl
+				%						\gla //
+				%						\glb //
+				%						\glft `.' //
+				%					\endgl
+				%				\xe
+				
+				\item В контекстах внутренней модальности, ср. рус. \textit{Иван может проплыть два километра} `Иван в состоянии сделать p'
+				
+				\item[] \textbf{Будет заполнено}
+				
+				%				\ex
+				%					\begingl
+				%						\gla //
+				%						\glb //
+				%						\glft `.' //
+				%					\endgl
+				%				\xe
+			\end{enumerate}
+			
+			\item Бытийные, локативные и посессивные глаголы
+			
+			\item[] Иное, ИГ
+			
+			\ex
+				\begingl
+					\gla di-la χːʷe te-b //
+					\glb I-{\sc gen} dog.{\sc abs} {\sc exst-n} //
+					\glft `У меня есть собака.' //
+				\endgl
+			\xe
+			
+			\item Глаголы и неглагольные предикаты аффекта, ср. \textit{бояться}, \textit{надеяться}, \textit{иметь подозрение}
+			
+			\item[] Иное, финитная зависимая клауза
+			
+			\ex
+				\begingl
+					\gla du $[$ @ χːu-d-a-lli murad w-ag.ha-wt-an-ni r-ik'ʷ-il$]$ uruχː r-ik'-ul=da  //
+					\glb I.{\sc abs} {} dog-{\sc pl-obl.pl-erg} Murad.{\sc abs} bite.{\sc ipfv.m-pot-fut} {\sc f}-say.{\sc ipfv-cvb} fear {\sc f}-say.{\sc ipfv-cvb=1} //
+					\glft `Я боюсь, что собаки покусают Мурада.' //
+				\endgl
+			\xe
+			
+			\item Глаголы знания, ср. \textit{знать}, \textit{понять}, \textit{обнаружить, что p}
+			
+			\item[] Иное, масдар
+			
+			\ex
+				\begingl
+					\gla $[$ @ ila kːujab ilsatːinna čːakːʷa-ci r-ih-ni$]$ du-l + b-uχː-a-tːi=akʷadi //
+					\glb {} you.{\sc gen} fiancée.{\sc abs} so beautiful-{\sc atr} {\sc f}-become.{\sc pfv-msd} I-{\sc erg} {\sc n}-know.{\sc ipfv-prog-cvb=neg.pst} //
+					\glft `Я не знал, что твоя невеста такая красивая.' //
+				\endgl
+			\xe
+			
+			\item Каузативы
+			
+			\item[] Иное, каузативная конструкция
+			
+			\ex
+				\begingl
+					\gla tːatːi-l duˤrħuˤ-cːi macːa b-urcː-aˤq-ib //
+					\glb father-{\sc erg} child-{\sc inter} sheep.{\sc abs} {\sc n}-find.{\sc ipfv-caus-aor} //
+					\glft `Отец заставил сына искать овцу.' //
+				\endgl
+			\xe
+		\end{enumerate}
+		
+		\item \textbf{Внешний посессор}
+		\begin{enumerate}
+			\item Базовая конструкция именной группы в изучаемом языке: вершинное и/или зависимостное маркирование
+			
+			\item[] Зависимостное маркирование
+			
+			\ex
+				\begingl
+					\gla tːatːila qal //
+					\glb father-{\sc gen} house //
+					\glft `дом отца' //
+				\endgl
+			\xe
+			
+			\item Есть ли в языке конструкция с внешним посессором, т.е. конструкция, в которой посессор (в широком смысле) выражается за пределами именной группы?
+			
+			\item[] Да
+			
+			\ex
+				\begingl
+					\gla di-la χːʷe te-b //
+					\glb I-{\sc gen} dog.{\sc abs} {\sc exst-n} //
+					\glft `У меня есть собака.' //
+				\endgl
+			\xe
+			
+			\item Свойства конструкции с внешним посессором: падежное маркирование или адлоги, согласование с глаголом в языках с вершинным маркированием, аппликативная или иные глагольные деривации, линейный порядок, топикализация и фокусирование
+			
+			\item[] \textbf{Будет заполнено}
+			
+			\item Семантика и функции конструкции с внешним посессором
+			
+			\item[] Это основной способ выражения предикативной посессивности
+			
+			\item Обязательность или опциональность конструкции с внешним посессором при различных семантических типах глаголов
+			
+			\item[] \textbf{Будет заполнено}
+			
+			\item Лексические ограничения на внешний посессор: семантические классы имён
+			
+			\item[] \textbf{Будет заполнено}
+		\end{enumerate}
+		
+	\end{enumerate}
+	
+	\printbibliography
+	
+\end{document}

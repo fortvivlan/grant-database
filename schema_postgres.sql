@@ -26,7 +26,13 @@ CREATE TABLE questions (
     nornakhichevan TEXT,
     udmurt TEXT,
     greben TEXT,
-    mountmari TEXT
+    mountmari TEXT,
+    icari TEXT,
+    macedonian TEXT,
+    norwegian TEXT,
+    kumyk TEXT,
+    northernkhanty TEXT,
+    ulch TEXT
 );
 
 CREATE INDEX idx_group_id ON questions(group_id);

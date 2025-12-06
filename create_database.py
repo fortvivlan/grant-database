@@ -283,6 +283,24 @@ def create_database(db_path: str):
     mountmari_data = parse_language_file('languages/12-mountmari.html', quest_data)
     print(f"Found {len(mountmari_data)} answers in 12-mountmari.html")
     
+    icari_data = parse_language_file('languages/13-icari.html', quest_data)
+    print(f"Found {len(icari_data)} answers in 13-icari.html")
+    
+    macedonian_data = parse_language_file('languages/14-macedonian.html', quest_data)
+    print(f"Found {len(macedonian_data)} answers in 14-macedonian.html")
+    
+    norwegian_data = parse_language_file('languages/15-norwegian.html', quest_data)
+    print(f"Found {len(norwegian_data)} answers in 15-norwegian.html")
+    
+    kumyk_data = parse_language_file('languages/16-kumyk.html', quest_data)
+    print(f"Found {len(kumyk_data)} answers in 16-kumyk.html")
+    
+    northernkhanty_data = parse_language_file('languages/17-northernkhanty.html', quest_data)
+    print(f"Found {len(northernkhanty_data)} answers in 17-northernkhanty.html")
+    
+    ulch_data = parse_language_file('languages/18-ulch.html', quest_data)
+    print(f"Found {len(ulch_data)} answers in 18-ulch.html")
+    
     # Create database
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -315,6 +333,12 @@ def create_database(db_path: str):
             udmurt TEXT,
             greben TEXT,
             mountmari TEXT,
+            icari TEXT,
+            macedonian TEXT,
+            norwegian TEXT,
+            kumyk TEXT,
+            northernkhanty TEXT,
+            ulch TEXT,
             FOREIGN KEY (group_id) REFERENCES groups(id)
         )
     ''')
@@ -360,13 +384,19 @@ def create_database(db_path: str):
         udmurt_text = udmurt_data.get(question_num, '')
         greben_text = greben_data.get(question_num, '')
         mountmari_text = mountmari_data.get(question_num, '')
+        icari_text = icari_data.get(question_num, '')
+        macedonian_text = macedonian_data.get(question_num, '')
+        norwegian_text = norwegian_data.get(question_num, '')
+        kumyk_text = kumyk_data.get(question_num, '')
+        northernkhanty_text = northernkhanty_data.get(question_num, '')
+        ulch_text = ulch_data.get(question_num, '')
         
         try:
             cursor.execute('''
                 INSERT INTO questions 
-                (question_number, group_id, question_text, russian, muira, danish, nganasan, westcircassian, polish, bulgarian, nanai, nornakhichevan, udmurt, greben, mountmari)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (question_num, group_id, question_text, russian_text, muira_text, danish_text, nganasan_text, westcircassian_text, polish_text, bulgarian_text, nanai_text, nornakhichevan_text, udmurt_text, greben_text, mountmari_text))
+                (question_number, group_id, question_text, russian, muira, danish, nganasan, westcircassian, polish, bulgarian, nanai, nornakhichevan, udmurt, greben, mountmari, icari, macedonian, norwegian, kumyk, northernkhanty, ulch)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (question_num, group_id, question_text, russian_text, muira_text, danish_text, nganasan_text, westcircassian_text, polish_text, bulgarian_text, nanai_text, nornakhichevan_text, udmurt_text, greben_text, mountmari_text, icari_text, macedonian_text, norwegian_text, kumyk_text, northernkhanty_text, ulch_text))
         except sqlite3.IntegrityError as e:
             print(f"ERROR: Duplicate question number: {question_num}")
             print(f"  Text: {question_text[:100]}")

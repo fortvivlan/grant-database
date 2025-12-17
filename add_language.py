@@ -1,180 +1,95 @@
 """
 Script to add a new language to the database
-Usage: python add_language.py <language_name> <txt_file_path>
-Example: python add_language.py french french.txt
+Usage: python add_language.py <number> <language_name>
+Example: python add_language.py 21 french
+
+This script will:
+1. Verify the language HTML file exists in languages/ folder
+2. Recreate the entire database with all languages (including the new one)
 """
 
-import sqlite3
 import sys
+import os
 import re
-from typing import Dict
-
-def parse_file(filename: str) -> Dict[str, str]:
-    """Parse a text file and extract questions with their numbers."""
-    # Try different encodings
-    encodings = ['utf-8', 'utf-16', 'cp1251', 'latin-1']
-    content = None
-    
-    for encoding in encodings:
-        try:
-            with open(filename, 'r', encoding=encoding) as f:
-                content = f.read()
-            break
-        except (UnicodeDecodeError, UnicodeError):
-            continue
-    
-    if content is None:
-        raise ValueError(f"Could not decode file {filename} with any known encoding")
-    
-    questions = {}
-    current_number = None
-    current_text = []
-    
-    lines = content.split('\n')
-    
-    for line in lines:
-        # Match question numbers like "1.1.", "2.4.1.", etc.
-        # Also match without the period after the number (for muira)
-        match = re.match(r'^(\d+(?:\.\d+)*)[.\s]\s*(.*)$', line)
-        
-        if match:
-            # Check if this is actually a new question number or just continuation
-            number_part = match.group(1)
-            text_part = match.group(2).strip()
-            
-            # Determine if this is a new question or continuation
-            is_new_question = line.strip().startswith(number_part)
-            
-            if is_new_question:
-                # Save previous question if exists
-                if current_number:
-                    questions[current_number] = ' '.join(current_text).strip()
-                
-                current_number = number_part
-                current_text = [text_part] if text_part else []
-            elif current_number and line.strip():
-                # Continue multiline questions - join with space
-                current_text.append(line.strip())
-        elif current_number and line.strip():
-            # Continue multiline questions - join with space
-            current_text.append(line.strip())
-    
-    # Save last question
-    if current_number:
-        questions[current_number] = ' '.join(current_text).strip()
-    
-    return questions
-
-def add_language_column(db_path: str, language_name: str):
-    """Add a new language column to the database."""
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    
-    # Check if column already exists
-    cursor.execute("PRAGMA table_info(questions)")
-    columns = [col[1] for col in cursor.fetchall()]
-    
-    if language_name.lower() in columns:
-        print(f"Warning: Column '{language_name}' already exists. Will update existing data.")
-        conn.close()
-        return True
-    
-    # Add new column
-    cursor.execute(f'ALTER TABLE questions ADD COLUMN {language_name.lower()} TEXT')
-    conn.commit()
-    conn.close()
-    print(f"✓ Added column '{language_name}' to database")
-    return False
-
-def update_language_data(db_path: str, language_name: str, language_data: Dict[str, str]):
-    """Update the database with language data."""
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    
-    updated_count = 0
-    missing_questions = []
-    
-    for question_num, answer in language_data.items():
-        cursor.execute(
-            f'UPDATE questions SET {language_name.lower()} = ? WHERE question_number = ?',
-            (answer, question_num)
-        )
-        if cursor.rowcount > 0:
-            updated_count += 1
-        else:
-            missing_questions.append(question_num)
-    
-    conn.commit()
-    conn.close()
-    
-    return updated_count, missing_questions
+from create_database import create_database
 
 def main():
     if len(sys.argv) != 3:
-        print("Usage: python add_language.py <language_name> <txt_file_path>")
-        print("Example: python add_language.py french french.txt")
+        print("Usage: python add_language.py <number> <language_name>")
+        print("Example: python add_language.py 21 french")
+        print("\nThis assumes you have already created a file like:")
+        print("  languages/21-french.html")
+        print("\nThe script will then recreate the database with all languages.")
         sys.exit(1)
     
-    language_name = sys.argv[1]
-    txt_file = sys.argv[2]
-    db_path = 'grant_database.db'
+    number = sys.argv[1]
+    language_name = sys.argv[2].lower()
     
-    print("=" * 60)
+    # Validate number format (should be 2 digits)
+    if not re.match(r'^\d{2}$', number):
+        print("Error: Number must be exactly 2 digits (e.g., 01, 21)")
+        sys.exit(1)
+    
+    # Validate language name (only letters, numbers, underscore, hyphen)
+    if not re.match(r'^[a-zA-Z][a-zA-Z0-9_-]*$', language_name):
+        print("Error: Language name must start with a letter and contain only letters, numbers, underscores, and hyphens")
+        sys.exit(1)
+    
+    # Expected filename
+    expected_file = os.path.join('languages', f'{number}-{language_name}.html')
+    
+    print("=" * 70)
     print(f"ADDING LANGUAGE: {language_name.upper()}")
-    print("=" * 60)
+    print("=" * 70)
     
-    # Validate language name (only letters, numbers, underscore)
-    if not re.match(r'^[a-zA-Z][a-zA-Z0-9_]*$', language_name):
-        print("Error: Language name must start with a letter and contain only letters, numbers, and underscores")
+    # Check if file exists
+    print(f"\n[1/2] Checking for language file...")
+    if not os.path.exists(expected_file):
+        print(f"✗ ERROR: File not found: {expected_file}")
+        print("\nPlease create the language HTML file first with the following format:")
+        print(f"  File: {expected_file}")
+        print("  Format:")
+        print("    1.1. <answer>")
+        print("    Your answer text here (can include HTML tags)")
+        print("    </answer>")
+        print("")
+        print("    2.1. <answer>")
+        print("    Another answer")
+        print("    </answer>")
+        print("\nYou can use languages/!EMPTY.html as a template.")
         sys.exit(1)
     
-    # Parse the file
-    print(f"\n[1/4] Parsing {txt_file}...")
-    try:
-        language_data = parse_file(txt_file)
-        print(f"✓ Found {len(language_data)} entries")
-    except FileNotFoundError:
-        print(f"Error: File '{txt_file}' not found")
-        sys.exit(1)
-    except Exception as e:
-        print(f"Error parsing file: {e}")
-        sys.exit(1)
+    print(f"✓ Found: {expected_file}")
     
-    # Add column to database
-    print(f"\n[2/4] Adding '{language_name}' column to database...")
-    column_exists = add_language_column(db_path, language_name)
+    # Count answers in the file
+    with open(expected_file, 'r', encoding='utf-8') as f:
+        content = f.read()
+        answer_count = len(re.findall(r'<answer>', content, re.IGNORECASE))
     
-    # Update data
-    print(f"\n[3/4] Updating database with {language_name} data...")
-    updated_count, missing_questions = update_language_data(db_path, language_name, language_data)
-    print(f"✓ Updated {updated_count} questions")
+    print(f"  File contains ~{answer_count} answer blocks")
     
-    if missing_questions:
-        print(f"\nWarning: {len(missing_questions)} question numbers in the file don't exist in database:")
-        for q in missing_questions[:10]:  # Show first 10
-            print(f"  - {q}")
-        if len(missing_questions) > 10:
-            print(f"  ... and {len(missing_questions) - 10} more")
+    # Recreate the database
+    print(f"\n[2/2] Recreating database with all languages...")
+    print("  (This will include your new language)")
+    print()
     
-    # Verify
-    print(f"\n[4/4] Verifying data...")
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute(f'SELECT COUNT(*) FROM questions WHERE {language_name.lower()} IS NOT NULL AND {language_name.lower()} != ""')
-    count = cursor.fetchone()[0]
-    cursor.execute('SELECT COUNT(*) FROM questions')
-    total = cursor.fetchone()[0]
-    conn.close()
+    # Delete old database
+    db_path = 'grant_database.db'
+    if os.path.exists(db_path):
+        os.remove(db_path)
+        print(f"  ✓ Removed old database")
     
-    print(f"✓ {language_name} coverage: {count}/{total} ({count/total*100:.1f}%)")
+    # Create new database (this will discover all languages including the new one)
+    create_database(db_path)
     
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 70)
     print(f"✓ Successfully added {language_name} to the database!")
-    print("=" * 60)
+    print("=" * 70)
     print("\nNext steps:")
-    print("1. Run 'python test_database.py' to verify")
-    print("2. Run 'python export_to_postgres.py' to update PostgreSQL schema")
-    print("3. Update your API/interface to include the new language")
+    print("1. Verify the database: python test_database.py")
+    print("2. Update PostgreSQL schema if needed: python export_to_postgres.py")
+    print("3. Update the fallback language list in app.py")
+    print(f"   Add '{language_name}' to the list in get_language_columns()")
 
 if __name__ == '__main__':
     main()

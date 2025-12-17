@@ -1,5 +1,7 @@
 ﻿-- PostgreSQL schema for Grant Database
 -- Compatible with render.com
+-- NOTE: This schema needs to be updated whenever new languages are added.
+-- Run export_to_postgres.py to generate an updated schema automatically.
 
 DROP TABLE IF EXISTS questions CASCADE;
 DROP TABLE IF EXISTS groups CASCADE;
@@ -32,7 +34,9 @@ CREATE TABLE questions (
     norwegian TEXT,
     kumyk TEXT,
     northernkhanty TEXT,
-    ulch TEXT
+    ulch TEXT,
+    abaza TEXT,
+    turkish TEXT
 );
 
 CREATE INDEX idx_group_id ON questions(group_id);

@@ -24,7 +24,7 @@ def get_language_columns():
         return sorted(languages)
     except:
         # Fallback to original languages if query fails
-        return ['bulgarian', 'danish', 'greben', 'icari', 'kumyk', 'macedonian', 'mountmari', 'muira', 'nanai', 'nganasan', 'northernkhanty', 'norwegian', 'nornakhichevan', 'polish', 'russian', 'udmurt', 'ulch', 'westcircassian']
+        return ['abaza', 'bulgarian', 'danish', 'greben', 'icari', 'kumyk', 'macedonian', 'mountmari', 'muira', 'nanai', 'nganasan', 'northernkhanty', 'norwegian', 'nornakhichevan', 'polish', 'russian', 'turkish', 'udmurt', 'ulch', 'westcircassian']
 
 @app.route('/')
 def index():
